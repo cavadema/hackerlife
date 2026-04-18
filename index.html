@@ -1,0 +1,2203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HackerLife RPG v5</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:monospace;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:16px}
+#app{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1{font-size:17px;font-weight:700;color:#7ee787;text-align:center;padding:8px 0 2px;letter-spacing:0.1em}
+h1 span{color:#484f58;font-size:11px;font-weight:400;display:block;margin-top:2px}
+.panel{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:13px 15px}
+.panel-title{font-size:10px;font-weight:700;color:#484f58;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.badge-count{background:#f85149;color:#fff;border-radius:10px;font-size:9px;font-weight:700;padding:1px 6px;min-width:16px;text-align:center}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:7px}
+.stats-grid-2{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.stat{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:7px 8px;text-align:center}
+.stat-val{font-size:16px;font-weight:700}
+.stat-label{font-size:9px;color:#484f58;margin-top:1px}
+.money{color:#3fb950}.purple{color:#a371f7}.orange{color:#e3b341}.red{color:#f85149}.blue{color:#58a6ff}
+.bar-row{display:flex;align-items:center;gap:7px;margin-top:6px}
+.bar-row span{font-size:9px;color:#484f58;white-space:nowrap;min-width:50px}
+.bar-wrap{flex:1;background:#21262d;border-radius:3px;height:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width 0.4s}
+.rank-badge{display:inline-block;background:#1f1635;color:#a371f7;border:1px solid #3d2d6e;border-radius:4px;font-size:10px;font-weight:700;padding:2px 7px}
+.terminal{background:#010409;border:1px solid #21262d;border-radius:8px;padding:11px 13px;font-size:11px;min-height:80px;max-height:130px;overflow-y:auto}
+.line{line-height:1.7}.dim{color:#484f58}.ok{color:#3fb950}.cmd{color:#79c0ff}.warn{color:#e3b341}.err{color:#f85149}
+.actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.action-btn{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px 12px;cursor:pointer;text-align:left;transition:border-color 0.15s,background 0.15s}
+.action-btn:hover:not(.disabled){background:#161b22;border-color:#58a6ff}
+.action-btn:active:not(.disabled){transform:scale(0.98)}
+.action-btn.disabled{opacity:0.4;cursor:not-allowed}
+.action-btn.esgotado{opacity:0.3;cursor:not-allowed;border-color:#21262d}
+.btn-title{font-size:11px;font-weight:700;color:#e6edf3}
+.btn-sub{font-size:10px;color:#484f58;margin-top:2px}
+.btn-reward{font-size:10px;font-weight:700;color:#3fb950;margin-top:4px}
+.btn-req{font-size:9px;color:#e3b341;margin-top:2px}
+.uses-dots{display:flex;gap:3px;margin-top:4px}
+.dot{width:6px;height:6px;border-radius:50%;background:#3fb950;display:inline-block}
+.dot.used{background:#21262d}
+/* celular */
+.phone-wrap{display:flex;justify-content:center;padding:8px 0}
+.phone{background:#1c1c1e;border:2px solid #3a3a3c;border-radius:24px;width:100%;max-width:380px;overflow:hidden}
+.phone-top{background:#1c1c1e;padding:10px 16px 8px;border-bottom:1px solid #2c2c2e;display:flex;align-items:center;justify-content:space-between}
+.phone-app-bar{display:flex;gap:4px}
+.phone-app{background:#2c2c2e;border:none;border-radius:8px;color:#c9d1d9;font-size:10px;font-weight:700;padding:5px 10px;cursor:pointer;transition:background 0.15s;position:relative}
+.phone-app:hover{background:#3a3a3c}
+.phone-app.active{background:#0a84ff;color:#fff}
+.phone-app .notif{position:absolute;top:-3px;right:-3px;background:#ff3b30;color:#fff;border-radius:8px;font-size:8px;font-weight:700;padding:1px 4px;min-width:14px;text-align:center}
+.phone-body{min-height:260px;max-height:340px;overflow-y:auto;background:#000}
+.inbox-list{padding:0}
+.inbox-item{padding:12px 16px;border-bottom:1px solid #1c1c1e;cursor:pointer;transition:background 0.15s;display:flex;gap:10px;align-items:flex-start}
+.inbox-item:hover{background:#1c1c1e}
+.inbox-item.unread-phishing{background:#1d0d0d}
+.inbox-item.unread-mission{background:#0d0d1d}
+.inbox-item.unread-info{background:#0d1d0d}
+.inbox-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;margin-top:2px}
+.inbox-content{flex:1;min-width:0}
+.inbox-from{font-size:11px;font-weight:700;color:#e6edf3;display:flex;justify-content:space-between}
+.inbox-time{font-size:9px;color:#484f58;font-weight:400}
+.inbox-subject{font-size:10px;color:#c9d1d9;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inbox-preview{font-size:10px;color:#484f58;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.unread-dot{width:7px;height:7px;border-radius:50%;background:#0a84ff;flex-shrink:0;margin-top:6px}
+.email-open{padding:14px 16px;background:#000}
+.email-header{border-bottom:1px solid #1c1c1e;padding-bottom:10px;margin-bottom:10px}
+.email-from{font-size:11px;font-weight:700;color:#e6edf3}
+.email-subject{font-size:13px;font-weight:700;color:#fff;margin:4px 0}
+.email-meta{font-size:10px;color:#484f58}
+.email-body{font-size:11px;color:#c9d1d9;line-height:1.8;white-space:pre-wrap}
+.email-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.email-btn{border-radius:8px;font-size:11px;font-weight:700;padding:7px 14px;cursor:pointer;border:none}
+.btn-accept{background:#30d158;color:#000}
+.btn-phish-click{background:#ff3b30;color:#fff}
+.btn-scan{background:#0a84ff;color:#fff}
+.btn-delete{background:#2c2c2e;color:#c9d1d9}
+.btn-back{background:none;border:none;color:#0a84ff;font-size:11px;cursor:pointer;padding:0;font-family:monospace;margin-bottom:10px;display:block}
+.sms-list{padding:12px 10px;display:flex;flex-direction:column;gap:8px}
+.sms-bubble{max-width:80%;padding:8px 12px;border-radius:16px;font-size:11px;line-height:1.6}
+.sms-in{background:#1c1c1e;color:#e6edf3;align-self:flex-start;border-bottom-left-radius:4px}
+.sms-sender{font-size:9px;color:#484f58;margin-bottom:2px}
+.empty-inbox{padding:40px 16px;text-align:center;color:#484f58;font-size:11px}
+/* loja */
+.tab-row{display:flex;gap:4px;margin-bottom:10px}
+.tab{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;color:#484f58;cursor:pointer;transition:all 0.15s}
+.tab.active{background:#161b22;color:#e6edf3;border-color:#58a6ff}
+.shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.shop-item{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:9px;cursor:pointer;text-align:center;transition:all 0.15s}
+.shop-item:hover:not(.owned):not(.cant-afford){background:#161b22;border-color:#58a6ff}
+.shop-item.owned{border-color:#238636;cursor:default;opacity:0.7}
+.shop-item.cant-afford{opacity:0.35;cursor:not-allowed}
+.item-icon{font-size:20px;margin-bottom:3px}
+.item-name{font-size:10px;font-weight:700;color:#e6edf3}
+.item-price{font-size:10px;color:#3fb950;margin-top:2px}
+.item-bonus{font-size:9px;color:#484f58;margin-top:1px}
+/* cursos */
+.course-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.course-item{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all 0.15s}
+.course-item:hover:not(.done):not(.cant-afford):not(.inprogress){background:#161b22;border-color:#a371f7}
+.course-item.done{border-color:#238636;opacity:0.7;cursor:default}
+.course-item.cant-afford{opacity:0.35;cursor:not-allowed}
+.course-item.inprogress{border-color:#e3b341;cursor:not-allowed}
+/* rede social */
+.social-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.social-avatar{width:44px;height:44px;border-radius:50%;background:#1a1a2e;border:2px solid #a371f7;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.social-handle{font-size:13px;font-weight:700;color:#e6edf3}
+.social-bio{font-size:10px;color:#484f58;margin-top:1px}
+.social-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.social-stat{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:7px;text-align:center}
+.social-stat-val{font-size:15px;font-weight:700;color:#e6edf3}
+.social-stat-label{font-size:9px;color:#484f58;margin-top:1px}
+.feed{background:#0d1117;border:1px solid #21262d;border-radius:8px;max-height:160px;overflow-y:auto;padding:8px 10px;margin-bottom:10px}
+.feed-item{font-size:10px;line-height:1.7;padding:6px 0;border-bottom:1px solid #21262d;color:#c9d1d9}
+.feed-item:last-child{border-bottom:none}
+.feed-item .fi-handle{color:#a371f7;font-weight:700}
+.feed-item .fi-time{color:#484f58;font-size:9px;margin-left:4px}
+.feed-item .fi-likes{color:#f85149;font-size:9px;margin-left:6px}
+.feed-item .fi-donation{color:#3fb950;font-weight:700}
+.blog-stat{display:flex;justify-content:space-between;font-size:10px;padding:4px 0;border-bottom:1px solid #21262d}
+.blog-stat:last-child{border-bottom:none}
+/* grupos */
+.group-card{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:11px 13px;margin-bottom:8px}
+.group-card.locked{opacity:0.5}
+.group-card.member{border-color:#a371f7}
+.group-name{font-size:12px;font-weight:700;color:#e6edf3}
+.group-tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle}
+.tag-init{background:#1a2a1a;color:#3fb950}
+.tag-mid{background:#1a1a2e;color:#58a6ff}
+.tag-elite{background:#2a0a2a;color:#a371f7}
+.tag-member{background:#1f1635;color:#a371f7}
+.group-desc{font-size:10px;color:#484f58;margin:4px 0 6px}
+.group-req{font-size:9px;color:#e3b341;margin-bottom:6px}
+.group-join-btn{background:#21262d;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:10px;font-weight:700;padding:5px 12px;cursor:pointer;transition:all 0.15s;font-family:monospace}
+.group-join-btn:hover{border-color:#a371f7;color:#a371f7}
+.group-join-btn:disabled{opacity:0.4;cursor:not-allowed}
+.group-missions{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.group-mission{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:8px 10px;cursor:pointer;transition:all 0.15s}
+.group-mission:hover:not(.disabled){border-color:#58a6ff}
+.group-mission.disabled{opacity:0.4;cursor:not-allowed}
+/* notícias */
+.news-item{padding:10px 14px;border-bottom:1px solid #1c1c1e}
+.news-item:last-child{border-bottom:none}
+.news-source{font-size:9px;font-weight:700;color:#484f58;text-transform:uppercase;letter-spacing:0.06em}
+.news-headline{font-size:11px;color:#e6edf3;margin-top:3px;line-height:1.5}
+.news-time{font-size:9px;color:#484f58;margin-top:2px}
+.news-group{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px}
+.alert-bar{background:#1a0a0a;border:1px solid #f85149;border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px}
+.alert-bar.hidden{display:none}
+/* modal missão */
+.modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.88);z-index:200;align-items:center;justify-content:center;padding:16px}
+.modal-bg.open{display:flex}
+.modal{background:#0d1117;border:1px solid #30363d;border-radius:12px;width:100%;max-width:560px;overflow:hidden}
+.modal-header{background:#161b22;padding:10px 14px;border-bottom:1px solid #30363d;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:12px;font-weight:700;color:#e3b341}
+.modal-close{background:none;border:none;color:#484f58;font-size:16px;cursor:pointer}
+.modal-close:hover{color:#f85149}
+.mterm{background:#010409;padding:13px;font-size:11px;min-height:160px;max-height:280px;overflow-y:auto}
+.minput-row{display:flex;align-items:center;gap:7px;padding:9px 13px;border-top:1px solid #21262d;background:#010409}
+.mprompt{color:#7ee787;font-size:12px;white-space:nowrap}
+.minput{flex:1;background:transparent;border:none;outline:none;color:#e6edf3;font-family:monospace;font-size:12px}
+.msubmit{background:#21262d;border:1px solid #30363d;border-radius:5px;color:#7ee787;font-family:monospace;font-size:10px;padding:4px 10px;cursor:pointer}
+.msubmit:hover{background:#30363d}
+.hint-btn{background:none;border:1px solid #30363d;border-radius:5px;color:#484f58;font-size:10px;padding:3px 7px;cursor:pointer}
+.hint-btn:hover{color:#e3b341;border-color:#e3b341}
+.ml{line-height:1.8}.ml.ok{color:#3fb950}.ml.err{color:#f85149}.ml.dim{color:#484f58}.ml.sys{color:#79c0ff}.ml.warn{color:#e3b341}
+.toast{position:fixed;top:18px;right:16px;background:#161b22;color:#3fb950;border:1px solid #238636;border-radius:8px;padding:9px 14px;font-size:11px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:260px}
+.toast.show{opacity:1}
+@media(max-width:480px){
+  .stats-grid,.stats-grid-2{grid-template-columns:repeat(2,1fr)}
+  .shop-grid{grid-template-columns:repeat(2,1fr)}
+  .actions-grid,.course-grid{grid-template-columns:1fr}
+}
+/* intro */
+#intro{position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:9999;display:flex;flex-direction:column;justify-content:center;padding:24px;overflow-y:auto}
+#intro-term{font-size:12px;line-height:2;max-width:680px;margin:0 auto;width:100%}
+#intro-term .il{color:#c9d1d9;display:block;min-height:1.2em}
+#intro-term .il.g{color:#3fb950}
+#intro-term .il.r{color:#f85149}
+#intro-term .il.y{color:#e3b341}
+#intro-term .il.d{color:#484f58}
+#intro-term .il.p{color:#a371f7}
+#intro-term .il.b{color:#58a6ff}
+#intro-skip{position:fixed;bottom:24px;right:24px;background:none;border:1px solid #30363d;border-radius:6px;color:#484f58;font-size:10px;font-family:monospace;padding:5px 12px;cursor:pointer;transition:all 0.2s}
+#intro-skip:hover{color:#e6edf3;border-color:#e6edf3}
+#intro-continue{display:none;margin:28px auto 60px;background:#238636;border:none;border-radius:8px;color:#fff;font-family:monospace;font-size:13px;font-weight:700;padding:12px 28px;cursor:pointer}
+#intro-continue:hover{background:#2ea043}
+.cursor{display:inline-block;width:8px;height:14px;background:#3fb950;animation:blink 1s infinite;vertical-align:middle;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+</style>
+</head>
+<body>
+<div id="intro">
+  <div id="intro-term"></div>
+  <button id="intro-continue" onclick="startGame()">▶ iniciar — a redenção começa agora</button>
+  <button id="intro-skip" onclick="startGame()">pular intro</button>
+</div>
+<div id="app" style="display:none">
+<h1>HACKERLIFE <span style="color:#a371f7">RPG</span><span>// ghost_zero — a redenção</span></h1>
+
+<div class="alert-bar hidden" id="alert-bar">
+  <span style="font-size:16px">🚨</span>
+  <div style="flex:1">
+    <div style="font-size:11px;font-weight:700;color:#f85149" id="alert-title">ALERTA</div>
+    <div style="font-size:10px;color:#c9d1d9" id="alert-msg"></div>
+  </div>
+  <button onclick="document.getElementById('alert-bar').classList.add('hidden')" style="background:#2a0a0a;border:1px solid #f85149;border-radius:6px;color:#f85149;padding:3px 8px;font-size:10px;cursor:pointer">ok</button>
+</div>
+
+<div class="panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+    <div>
+      <span style="font-size:13px;font-weight:700;color:#e6edf3">ghost_zero</span>
+      <span class="rank-badge" style="margin-left:7px" id="rank-badge">Script Kiddie</span>
+    </div>
+    <div style="font-size:10px;color:#484f58">nível <span id="level" style="color:#e6edf3;font-weight:700">1</span></div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-val money" id="money">R$0</div><div class="stat-label">💰 grana</div></div>
+    <div class="stat"><div class="stat-val purple" id="power">1x</div><div class="stat-label">⚡ poder</div></div>
+    <div class="stat"><div class="stat-val orange" id="rep">0</div><div class="stat-label">💀 rep</div></div>
+  </div>
+  <div class="stats-grid-2" style="margin-top:7px">
+    <div class="stat"><div class="stat-val blue" id="defense">0%</div><div class="stat-label">🛡️ defesa</div></div>
+    <div class="stat"><div class="stat-val red" id="heat">0%</div><div class="stat-label">🔥 risco</div></div>
+    <div class="stat"><div class="stat-val" id="trace-chance" style="color:#f85149">100%</div><div class="stat-label">🚔 rastreio</div></div>
+  </div>
+  <div class="bar-row"><span>XP</span><div class="bar-wrap"><div class="bar-fill" id="xp-bar" style="width:0%;background:#a371f7"></div></div><span id="xp-label" style="min-width:60px;text-align:right;font-size:9px">0/100</span></div>
+  <div class="bar-row"><span>defesa</span><div class="bar-wrap"><div class="bar-fill" id="def-bar" style="width:0%;background:#58a6ff"></div></div></div>
+  <div class="bar-row"><span>risco</span><div class="bar-wrap"><div class="bar-fill" id="heat-bar" style="width:0%;background:#e3b341"></div></div></div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">terminal</div>
+  <div class="terminal" id="terminal">
+    <div class="line dim"># HackerLife v5 — bem-vindo</div>
+    <div class="line warn"># verifique o celular — cuidado com phishing</div>
+    <div class="line dim"># cursos aumentam poder permanentemente</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">📱 celular <span class="badge-count" id="phone-notif-total" style="display:none">0</span></div>
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="phone-top">
+        <span style="font-size:10px;color:#8e8e93">ghost_zero@darknet</span>
+        <div class="phone-app-bar">
+          <button class="phone-app active" onclick="switchPhoneTab('email',this)">✉ e-mail<span class="notif" id="email-notif" style="display:none">0</span></button>
+          <button class="phone-app" onclick="switchPhoneTab('sms',this)">💬 SMS<span class="notif" id="sms-notif" style="display:none">0</span></button>
+          <button class="phone-app" onclick="switchPhoneTab('news',this)">📰 news</button>
+        </div>
+      </div>
+      <div class="phone-body" id="phone-body"></div>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">🐦 x_hacker <span style="color:#484f58;font-weight:400;font-size:9px">— rede social anônima</span></div>
+  <div class="social-header">
+    <div class="social-avatar">🕶️</div>
+    <div>
+      <div class="social-handle">@<span id="social-handle">ghost_zero</span></div>
+      <div class="social-bio" id="social-bio">novato no submundo. ainda aprendendo.</div>
+    </div>
+  </div>
+  <div class="social-stats">
+    <div class="social-stat"><div class="social-stat-val" id="soc-followers">0</div><div class="social-stat-label">seguidores</div></div>
+    <div class="social-stat"><div class="social-stat-val" style="color:#3fb950" id="soc-donations">R$0</div><div class="social-stat-label">doações</div></div>
+    <div class="social-stat"><div class="social-stat-val" style="color:#e3b341" id="soc-posts">0</div><div class="social-stat-label">posts</div></div>
+  </div>
+  <div class="feed" id="social-feed"><div style="color:#484f58;font-size:10px;text-align:center;padding:20px 0">nenhum post ainda — complete hacks para aparecer no feed</div></div>
+  <div class="actions-grid">
+    <div class="action-btn" id="btn-post-hack" style="display:none">
+      <div class="btn-title">📢 Postar sobre hack</div>
+      <div class="btn-sub">conta sem revelar identidade</div>
+      <div class="btn-reward">+seguidores · chance de doação</div>
+    </div>
+    <div class="action-btn" id="btn-post-tutorial">
+      <div class="btn-title">🧵 Postar tutorial</div>
+      <div class="btn-sub">dica técnica genérica</div>
+      <div class="btn-reward">+seguidores orgânicos</div>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">💀 hacking <span style="color:#30363d;font-weight:400;font-size:9px">— usos limitados</span></div>
+  <div class="actions-grid" id="hack-actions"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">🕵️ missões especiais</div>
+  <div class="actions-grid" id="mission-actions"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">👥 grupos hackers</div>
+  <div id="groups-section"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">🔧 freelance</div>
+  <div class="actions-grid" id="freelance-actions"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">📝 blog — <span id="blog-status-label" style="color:#484f58;font-weight:400">não criado</span></div>
+  <div id="blog-section"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">🎓 cursos técnicos</div>
+  <div class="course-grid" id="course-grid"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">🛵 delivery</div>
+  <div class="actions-grid" id="delivery-actions"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">🛒 upgrades</div>
+  <div class="tab-row">
+    <div class="tab active" onclick="setShopTab('atk',this)">⚡ ataque</div>
+    <div class="tab" onclick="setShopTab('def',this)">🛡️ defesa</div>
+    <div class="tab" onclick="setShopTab('del',this)">🛵 delivery</div>
+  </div>
+  <div class="shop-grid" id="shop"></div>
+</div>
+</div>
+
+<!-- Modal missão -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">missão</span>
+      <div style="display:flex;gap:7px;align-items:center">
+        <button class="hint-btn" id="hint-btn">💡 dica</button>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+    </div>
+    <div class="mterm" id="mterm"></div>
+    <div class="minput-row" id="minput-row">
+      <span class="mprompt" id="mprompt">login:</span>
+      <input class="minput" id="minput" autocomplete="off" spellcheck="false" placeholder="digite aqui...">
+      <button class="msubmit" id="msubmit">ENTER</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// STATE
+const S={money:0,xp:0,level:1,rep:0,heat:0,power:1,defense:0,xpNeeded:100,
+  owned:new Set(),cds:{},uses:{},doneMissions:new Set(),shopTab:"atk",
+  phoneTab:"email",openEmail:null,
+  blog:{created:false,posts:0,visitors:0,income:0},courses:{},
+  social:{followers:0,donations:0,posts:0,lastHack:null,feedItems:[]},
+  groups:{member:null,completedGroupMissions:new Set()},
+  agent:{level:0,alerted:false,warrantIssued:false,closingIn:false},
+  hackCycles:{}}; // conta quantos resets cada hack já teve
+
+const RANKS=[{min:1,n:"Script Kiddie"},{min:3,n:"Cracker Novato"},{min:5,n:"Black Hat"},{min:8,n:"Elite Hacker"},{min:12,n:"Cyber God"}];
+const inbox=[], smsBox=[];
+
+function getRank(){let r=RANKS[0];for(const k of RANKS)if(S.level>=k.min)r=k;return r.n;}
+function traceChance(){return Math.max(0,Math.round(S.heat*(1-S.defense/100)));}
+function toast(m){const e=document.getElementById("toast");e.textContent=m;e.classList.add("show");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("show"),2600);}
+function log(m,c=""){const t=document.getElementById("terminal");const d=document.createElement("div");d.className="line "+c;d.textContent=m;t.appendChild(d);t.scrollTop=t.scrollHeight;if(t.children.length>60)t.removeChild(t.children[0]);}
+function showAlert(t,m){document.getElementById("alert-title").textContent=t;document.getElementById("alert-msg").textContent=m;document.getElementById("alert-bar").classList.remove("hidden");}
+function gainXP(n){
+  S.xp+=n;
+  while(S.xp>=S.xpNeeded){
+    S.xp-=S.xpNeeded;S.level++;S.xpNeeded=Math.round(S.xpNeeded*1.6);
+    log(">>> LEVEL UP! Nível "+S.level+" — "+getRank(),"ok");
+    toast("🎉 Level "+S.level+"!");
+    // subir de nível reduz degradação de todos os hacks em 1 ciclo
+    for(const id in S.hackCycles){
+      if(S.hackCycles[id]>0){
+        S.hackCycles[id]--;
+        log("> level up: alvos de '"+id+"' ficaram menos atentos","ok");
+      }
+    }
+  }
+}
+function getUses(id,max){if(S.uses[id]===undefined)S.uses[id]=max;return S.uses[id];}
+
+function updateUI(){
+  document.getElementById("money").textContent="R$"+S.money;
+  document.getElementById("power").textContent=S.power+"x";
+  document.getElementById("rep").textContent=S.rep;
+  document.getElementById("heat").textContent=Math.min(100,S.heat)+"%";
+  document.getElementById("defense").textContent=S.defense+"%";
+  document.getElementById("level").textContent=S.level;
+  document.getElementById("rank-badge").textContent=getRank();
+  document.getElementById("xp-label").textContent=S.xp+"/"+S.xpNeeded;
+  document.getElementById("xp-bar").style.width=Math.min(100,S.xp/S.xpNeeded*100)+"%";
+  const h=Math.min(100,S.heat);
+  document.getElementById("heat-bar").style.width=h+"%";
+  document.getElementById("heat-bar").style.background=h>70?"#f85149":"#e3b341";
+  document.getElementById("def-bar").style.width=S.defense+"%";
+  const tc=traceChance();
+  document.getElementById("trace-chance").textContent=tc+"%";
+  document.getElementById("trace-chance").style.color=tc>70?"#f85149":tc>30?"#e3b341":"#3fb950";
+  renderHacks();renderMissions();renderFreelance();renderBlog();renderCourses();renderDelivery();renderShop();updateSocial();renderGroups();
+}
+
+// INBOX
+function addEmail(e){inbox.unshift({...e,id:Date.now()+Math.random(),read:false,scanned:false});updateNotif();renderPhone();toast("📧 "+e.subject);}
+function addSMS(s){smsBox.push({...s,id:Date.now()+Math.random(),read:false});updateNotif();renderPhone();toast("💬 SMS de "+s.from);}
+function updateNotif(){
+  const ue=inbox.filter(m=>!m.read).length, us=smsBox.filter(m=>!m.read).length, tot=ue+us;
+  const te=document.getElementById("phone-notif-total");te.textContent=tot;te.style.display=tot>0?"inline":"none";
+  const en=document.getElementById("email-notif");en.textContent=ue;en.style.display=ue>0?"inline":"none";
+  const sn=document.getElementById("sms-notif");sn.textContent=us;sn.style.display=us>0?"inline":"none";
+}
+
+function switchPhoneTab(tab,el){
+  S.phoneTab=tab;S.openEmail=null;
+  document.querySelectorAll(".phone-app").forEach(b=>b.classList.remove("active"));el.classList.add("active");
+  renderPhone();
+}
+
+function renderPhone(){
+  if(S.phoneTab==="email")renderEmailTab();
+  else if(S.phoneTab==="sms")renderSMSTab();
+  else if(S.phoneTab==="news")renderNewsTab();
+}
+
+function renderEmailTab(){
+  const body=document.getElementById("phone-body");
+  if(S.openEmail!==null){
+    const em=inbox.find(m=>m.id===S.openEmail);
+    if(!em){S.openEmail=null;renderEmailTab();return;}
+    em.read=true;updateNotif();
+    const isSus=em.type==="phishing"&&!em.acted;
+    body.innerHTML=`<div class="email-open">
+      <button class="btn-back" id="btn-back">← voltar</button>
+      <div class="email-header">
+        <div class="email-from">${em.from}${isSus?' <span style="background:#3d0a0a;color:#f85149;border-radius:4px;font-size:9px;padding:1px 5px">SUSPEITO?</span>':''}</div>
+        <div class="email-subject">${em.subject}</div>
+        <div class="email-meta">${em.time}</div>
+      </div>
+      <div class="email-body">${em.body}</div>
+      <div class="email-actions" id="em-actions"></div>
+    </div>`;
+    document.getElementById("btn-back").onclick=()=>{S.openEmail=null;renderPhone();};
+    const ea=document.getElementById("em-actions");
+    if(em.acted){ea.innerHTML=`<span style="font-size:10px;color:#484f58">${em.actedResult}</span>`;}
+    else if(em.type==="phishing"){
+      const b1=document.createElement("button");b1.className="email-btn btn-phish-click";b1.textContent="🔗 clicar no link";b1.onclick=()=>clickPhish(em.id);ea.appendChild(b1);
+      if(S.owned.has("emailscanner")){const b2=document.createElement("button");b2.className="email-btn btn-scan";b2.textContent="🔍 escanear";b2.onclick=()=>scanEmail(em.id);ea.appendChild(b2);}
+      const b3=document.createElement("button");b3.className="email-btn btn-delete";b3.textContent="🗑 deletar";b3.onclick=()=>deleteEmail(em.id);ea.appendChild(b3);
+    } else if(em.type==="mission"){
+      if(em.missionReward){const b1=document.createElement("button");b1.className="email-btn btn-accept";b1.textContent="✅ aceitar";b1.onclick=()=>acceptMissionEmail(em.id);ea.appendChild(b1);}
+      const b2=document.createElement("button");b2.className="email-btn btn-delete";b2.textContent="🗑 ignorar";b2.onclick=()=>deleteEmail(em.id);ea.appendChild(b2);
+    } else {
+      const b=document.createElement("button");b.className="email-btn btn-delete";b.textContent="🗑 deletar";b.onclick=()=>deleteEmail(em.id);ea.appendChild(b);
+    }
+    return;
+  }
+  if(!inbox.length){body.innerHTML=`<div class="empty-inbox">nenhum e-mail ainda.</div>`;return;}
+  body.innerHTML=`<div class="inbox-list">${inbox.map(m=>{
+    const ic=m.type==="phishing"?"🎣":m.type==="mission"?"🎯":"ℹ️";
+    const bg=m.type==="phishing"?"#3d0a0a":m.type==="mission"?"#0d0d1d":"#0a1a0a";
+    const cls=m.read?"":"unread-"+m.type;
+    return `<div class="inbox-item ${cls}" data-id="${m.id}">
+      <div class="inbox-avatar" style="background:${bg}">${ic}</div>
+      <div class="inbox-content">
+        <div class="inbox-from">${m.from}<span class="inbox-time">${m.time}</span></div>
+        <div class="inbox-subject">${m.subject}</div>
+        <div class="inbox-preview">${m.preview}</div>
+      </div>
+      ${!m.read?'<div class="unread-dot"></div>':''}
+    </div>`;
+  }).join("")}</div>`;
+  body.querySelectorAll(".inbox-item").forEach(el=>{
+    el.onclick=()=>{S.openEmail=parseFloat(el.dataset.id)||el.dataset.id;const em=inbox.find(m=>String(m.id)===el.dataset.id);if(em)S.openEmail=em.id;renderPhone();};
+  });
+}
+
+function renderSMSTab(){
+  const body=document.getElementById("phone-body");
+  smsBox.forEach(m=>m.read=true);updateNotif();
+  if(!smsBox.length){body.innerHTML=`<div class="empty-inbox">nenhuma mensagem.</div>`;return;}
+  body.innerHTML=`<div class="sms-list">${smsBox.map(m=>`
+    <div>${!m.isMe?`<div class="sms-sender">${m.from}</div>`:""}
+    <div class="sms-bubble ${m.isMe?"sms-out":"sms-in"}" style="${m.isMe?"background:#0a84ff;color:#fff;align-self:flex-end":"background:#1c1c1e;color:#e6edf3"}">${m.text}</div></div>`).join("")}</div>`;
+}
+
+function deleteEmail(id){const i=inbox.findIndex(m=>m.id===id);if(i>=0)inbox.splice(i,1);S.openEmail=null;renderPhone();updateNotif();}
+function scanEmail(id){
+  const em=inbox.find(m=>m.id===id);if(!em)return;
+  if(em.type==="phishing"){showAlert("🔍 PHISHING DETECTADO","E-mail malicioso de '"+em.from+"' bloqueado!");log("> scanner: phishing detectado de "+em.from,"ok");toast("✅ Phishing bloqueado!");em.acted=true;em.actedResult="⛔ bloqueado pelo scanner.";renderPhone();}
+}
+function clickPhish(id){
+  const em=inbox.find(m=>m.id===id);if(!em||em.acted)return;
+  const lost=Math.min(S.money,Math.round((S.money*0.2+50)*(S.owned.has("antivirus")?0.5:1)));
+  S.money=Math.max(0,S.money-lost);em.acted=true;em.actedResult="💸 perdeu R$"+lost+".";
+  showAlert("💸 PHISHING!","Você caiu no golpe e perdeu R$"+lost+".");log("> phishing! perdeu R$"+lost,"err");toast("💸 -R$"+lost);updateUI();renderPhone();
+}
+function acceptMissionEmail(id){
+  const em=inbox.find(m=>m.id===id);if(!em||em.acted)return;
+  em.acted=true;em.actedResult="✓ aceita";
+  if(em.missionReward){const r=em.missionReward;S.money+=r.money||0;gainXP(r.xp||0);S.rep+=r.rep||0;S.heat=Math.min(100,S.heat+(r.heat||0));log("> missão por email aceita: +R$"+(r.money||0),"ok");toast("🎯 +R$"+(r.money||0));}
+  updateUI();renderPhone();
+}
+
+// HACKS
+const HACKS=[
+  {id:"wifi",t:"Quebrar Wi-Fi vizinho",s:"brute force básico",m:15,xp:10,rep:1,heat:5,cd:3000,max:5,reset:60000},
+  {id:"phish",t:"Phishing simples",s:"e-mail falso de banco",m:40,xp:20,rep:2,heat:8,cd:5000,max:4,reset:90000},
+  {id:"scrape",t:"Vazar dados",s:"scraping + dark web",m:90,xp:35,rep:4,heat:12,cd:7000,max:3,reset:120000,lvl:2,pwr:2},
+  {id:"ransom",t:"Ransomware local",s:"empresa pequena",m:220,xp:60,rep:8,heat:20,cd:10000,max:2,reset:180000,lvl:4,pwr:3},
+];
+
+// retorna o multiplicador de degradação baseado em ciclos repetidos
+// ciclo 0 = normal, ciclo 1 = -20% lucro +20% risco, ciclo 2 = -40% +40%, cap em ciclo 3
+function hackDegradation(id){
+  const cycles=S.hackCycles[id]||0;
+  const earningMult=Math.max(0.4, 1 - cycles*0.2);   // mínimo 40% do lucro original
+  const heatMult   =Math.min(2.0, 1 + cycles*0.2);   // máximo 2x o risco original
+  return {cycles, earningMult, heatMult};
+}
+
+function hackDegLabel(cycles){
+  if(cycles===0)return null;
+  if(cycles===1)return"⚠ alvo cansado: lucro -20% · risco +20%";
+  if(cycles===2)return"🔴 alvo suspeito: lucro -40% · risco +40%";
+  return"💀 alvo queimado: lucro -60% · risco +60%";
+}
+
+function renderHacks(){
+  const c=document.getElementById("hack-actions");c.innerHTML="";
+  for(const a of HACKS){
+    const u=getUses(a.id,a.max),locked=(a.lvl&&S.level<a.lvl)||(a.pwr&&S.power<a.pwr),cd=!!S.cds[a.id],esg=u<=0;
+    const {cycles,earningMult}=hackDegradation(a.id);
+    const btn=document.createElement("div");btn.className="action-btn"+(cd||locked||esg?" disabled":"")+(esg?" esgotado":"");
+    const earn=Math.round((a.m*S.power*0.6+a.m*0.4)*earningMult);
+    const dots=Array.from({length:a.max},(_,i)=>`<span class="dot${i>=u?" used":""}"></span>`).join("");
+    const tc=traceChance();
+    const degLabel=hackDegLabel(cycles);
+    btn.innerHTML=`<div class="btn-title">${a.t}</div><div class="btn-sub">${a.s}</div>
+      <div class="btn-reward">${esg?"⚠️ esgotado":"+R$~"+earn+" · +"+a.xp+"xp"}</div>
+      ${degLabel?`<div class="btn-req">${degLabel}</div>`:""}
+      ${locked?`<div class="btn-req">🔒 nível ${a.lvl||""}${a.pwr?" / poder "+a.pwr+"x":""}</div>`:""}
+      ${!esg&&!locked&&tc>50?`<div class="btn-req">⚠️ rastreio ${tc}%</div>`:""}
+      ${cd&&!esg?`<div class="btn-req">⏳ recarregando…</div>`:""}
+      ${!esg?`<div class="uses-dots">${dots}</div>`:""}`;
+    if(!cd&&!locked&&!esg)btn.onclick=()=>doHack(a);
+    c.appendChild(btn);
+  }
+}
+
+function doHack(a){
+  if(S.cds[a.id])return;
+  if(S.heat>=90){toast("🚨 Risco demais! Faça deliveries.");return;}
+  const u=getUses(a.id,a.max);if(u<=0){toast("Alvo esgotado!");return;}
+
+  const {cycles,earningMult,heatMult}=hackDegradation(a.id);
+  const earn=Math.round((a.m*S.power*0.6+a.m*0.4)*earningMult);
+  const heatCost=Math.round(a.heat*heatMult);
+
+  S.money+=earn;gainXP(a.xp);S.rep+=a.rep;S.heat=Math.min(100,S.heat+heatCost);S.uses[a.id]--;
+  // penalidade de backdoor ativo
+  if(S._backdoor){ S.heat=Math.min(100,S.heat+2); log("> backdoor ativo: risco +2% extra","err"); }
+
+  // aviso de degradação
+  if(cycles>0) log("> [alvo desgastado] lucro reduzido · risco aumentado (ciclo "+cycles+")","warn");
+  log("> "+a.t+" → R$"+earn+" | risco +"+heatCost+"% | "+S.uses[a.id]+" uso(s)","cmd");
+
+  // rede social
+  S.social.lastHack=a.id;
+  const autoFollowers=Math.round(1+Math.random()*4);
+  gainFollowers(autoFollowers);
+  log("> +"+autoFollowers+" seguidores no x_hacker por essa ação","dim");
+
+  if(S.uses[a.id]===0&&a.reset){
+    log("> [!] alvos esgotados","warn");
+    setTimeout(()=>{
+      S.uses[a.id]=a.max;
+      // incrementar ciclo ao resetar — alvo fica mais difícil
+      S.hackCycles[a.id]=(S.hackCycles[a.id]||0)+1;
+      const nc=S.hackCycles[a.id];
+      if(nc===1) log("> [!] novos alvos para '"+a.t+"' — mas estão mais atentos","warn");
+      else if(nc===2) log("> [!] alvos para '"+a.t+"' muito desconfiados — considere upgrades","err");
+      else if(nc>=3) log("> [!] '"+a.t+"' praticamente queimado — hora de evoluir","err");
+      else log("> [+] novos alvos: "+a.t,"ok");
+      toast("Novos alvos: "+a.t+(nc>0?" (ciclo "+(nc+1)+")":""));
+      renderHacks();
+    },a.reset);
+  }
+  setTimeout(()=>rollEvent(),400);
+  checkAgent();
+  S.cds[a.id]=true;setTimeout(()=>{delete S.cds[a.id];renderHacks();},a.cd);
+  updateUI();
+}
+
+function rollEvent(){
+  const tc=traceChance();if(Math.random()*100>tc)return;
+  const r=Math.random();
+  if(S.defense<20){if(r<0.35)triggerPolice();else if(r<0.65)triggerCounterHack();else triggerTrace();}
+  else if(S.defense<50){r<0.5?triggerTrace():triggerPolice();}
+  else triggerTrace();
+}
+function triggerTrace(){showAlert("📡 SINAL RASTREADO","Risco +10%. Melhore sua defesa!");S.heat=Math.min(100,S.heat+10);log("> sinal rastreado","warn");updateUI();}
+function triggerPolice(){showAlert("🚔 POLÍCIA NA ÁREA","Risco +20%! Fique offline!");S.heat=Math.min(100,S.heat+20);log("> [!!!] alerta policial","err");toast("🚔 Polícia! Faça deliveries!");updateUI();}
+function triggerCounterHack(){const lost=Math.min(S.money,Math.round(S.money*0.15+20));S.money=Math.max(0,S.money-lost);showAlert("💥 CONTRA-HACK!","Perdeu R$"+lost+". Instale um firewall!");log("> contra-hack — perdeu R$"+lost,"err");toast("💥 Contra-hack! -R$"+lost);updateUI();}
+
+// ---- INVASÃO COM TERMINAL ----
+let _invasionActive=false;
+let _invasionStep=0;
+
+function triggerInvasion(){
+  if(_invasionActive||S.owned.has("firewall"))return;
+  _invasionActive=true;
+
+  // notificação no terminal principal primeiro
+  log("> [!!!] ATIVIDADE SUSPEITA DETECTADA NA MÁQUINA","err");
+  log("> alguém está tentando entrar no seu sistema...","err");
+  toast("⚠️ Invasão em andamento!");
+
+  // abre modal com terminal do invasor
+  setTimeout(()=>{
+    document.getElementById("mterm").innerHTML="";
+    document.getElementById("modal-title").textContent="🔴 INVASÃO DETECTADA";
+    document.getElementById("minput-row").style.display="none";
+    document.getElementById("modal-bg").classList.add("open");
+    _invasionStep=1;
+    runInvasionSequence();
+  },1500);
+}
+
+function runInvasionSequence(){
+  const iml=(m,c,d)=>setTimeout(()=>mlog(m,c),d);
+
+  iml("[ invasor conectado — identificando sistema ]","err",0);
+  iml("scanning ports 22, 80, 443, 3306...","dim",700);
+  iml("porta 22 aberta. tentando SSH bruteforce...","warn",1400);
+  iml("tentativa 1/3... falhou","dim",2100);
+  iml("tentativa 2/3... falhou","dim",2600);
+  iml("tentativa 3/3... ACESSO OBTIDO","err",3200);
+  iml("","",3800);
+  iml("$ whoami","sys",4000);
+  iml("root","err",4500);
+  iml("$ ls /home/ghost_zero","sys",5000);
+  iml("projetos/  .ssh/  wallet.dat  logs/  scripts/","",5600);
+  iml("","",6000);
+  iml("$ cat wallet.dat","sys",6200);
+  iml("BTC: 0.0034  |  carteira: 1A2B3C...","warn",6800);
+  iml("","",7200);
+  iml("$ cp -r /home/ghost_zero /tmp/exfil","sys",7400);
+  iml("transferindo dados... 847MB","warn",8000);
+
+  // no meio da invasão — dar opção de reagir
+  setTimeout(()=>{
+    mlog("","");
+    mlog("▶ VOCÊ PERCEBEU A INVASÃO","ok");
+    mlog("","");
+    mlog("o que você faz?","");
+    mlog("  [1] Desconectar da internet agora","dim");
+    mlog("  [2] Tentar rastrear o invasor","dim");
+    mlog("  [3] Ignorar (arriscado)","dim");
+    mlog("","");
+    document.getElementById("mprompt").textContent="reação (1-3): ";
+    document.getElementById("minput").value="";
+    document.getElementById("minput").type="text";
+    document.getElementById("minput-row").style.display="flex";
+    document.getElementById("minput").focus();
+    _invasionStep=2;
+    _mission="__invasion__";
+  },9000);
+}
+
+function submitInvasionReaction(){
+  const val=document.getElementById("minput").value.trim();
+  if(!["1","2","3"].includes(val)){mlog("opção inválida.","err");document.getElementById("minput").value="";return;}
+  document.getElementById("minput-row").style.display="none";
+  _invasionStep=3;
+
+  if(val==="1"){
+    // DESCONECTAR — melhor resultado
+    mlog("","");
+    mlog("desconectando cabo de rede...","warn");
+    setTimeout(()=>mlog("conexão cortada.","ok"),600);
+    setTimeout(()=>{
+      mlog("","");
+      mlog("$ connection reset by peer","err");
+      mlog("[ invasor desconectado ]","ok");
+      mlog("","");
+      mlog("transferência interrompida em 43%.","dim");
+      mlog("dados parcialmente exfiltrados.","warn");
+      const lost=Math.round(S.money*0.05+10);
+      S.money=Math.max(0,S.money-lost);
+      S.heat=Math.min(100,S.heat+5);
+      mlog("dano: -R$"+lost+" · risco +5%","warn");
+      mlog("","");
+      mlog("DICA: instale um Firewall para bloquear isso.","ok");
+      log("> invasão interrompida. dano parcial: -R$"+lost,"warn");
+      toast("🔌 Desconectado! Dano parcial contido.");
+      finishInvasion();
+    },1400);
+
+  } else if(val==="2"){
+    // RASTREAR — funciona só se tiver proxychains ou defesa alta
+    mlog("","");
+    mlog("iniciando traceroute reverso...","warn");
+    setTimeout(()=>{
+      if(S.owned.has("proxychains")||S.defense>=50){
+        mlog("rastreando... 3 hops... 7 hops...","dim");
+        setTimeout(()=>{
+          mlog("origem identificada: 45.33.32.156 — Rússia","ok");
+          mlog("reportando para CERT.br...","ok");
+          setTimeout(()=>{
+            mlog("","");
+            mlog("[ invasor bloqueado e reportado ]","ok");
+            mlog("rep +5 · risco -5% · dano zero","ok");
+            S.rep+=5; S.heat=Math.max(0,S.heat-5);
+            log("> invasor rastreado e reportado. rep +5","ok");
+            toast("🕵️ Invasor rastreado! Rep +5");
+            finishInvasion();
+          },1500);
+        },1200);
+      } else {
+        mlog("erro: ferramentas insuficientes.","err");
+        setTimeout(()=>{
+          mlog("precisa de ProxyChains ou defesa 50%+.","warn");
+          mlog("enquanto isso, invasor continuou...","err");
+          const lost=Math.round(S.money*0.2+30);
+          S.money=Math.max(0,S.money-lost);
+          S.heat=Math.min(100,S.heat+15);
+          mlog("dano total: -R$"+lost+" · risco +15%","err");
+          log("> tentativa de rastreio falhou. dano total: -R$"+lost,"err");
+          toast("💀 Rastreio falhou! Dano total.");
+          finishInvasion();
+        },1000);
+      }
+    },1200);
+
+  } else {
+    // IGNORAR — pior resultado
+    mlog("","");
+    mlog("você não fez nada.","dim");
+    setTimeout(()=>{
+      mlog("$ tar -czf /tmp/exfil.tar.gz /home/ghost_zero","sys");
+      mlog("transferência completa. 847MB enviados.","err");
+      mlog("$ rm -rf /home/ghost_zero/projetos","err");
+      setTimeout(()=>{
+        mlog("","");
+        mlog("[ invasor saiu. deixou backdoor instalado. ]","err");
+        const lost=Math.round(S.money*0.25+50);
+        S.money=Math.max(0,S.money-lost);
+        S.heat=Math.min(100,S.heat+20);
+        // instala "backdoor" como debuff
+        S._backdoor=true;
+        mlog("dano: -R$"+lost+" · risco +20% · backdoor ativo","err");
+        mlog("","");
+        mlog("BACKDOOR ativo: risco +2% a cada hack até remover.","warn");
+        mlog("remova em: Loja → Defesa → IDS/IPS","warn");
+        log("> invasão completa. backdoor instalado. -R$"+lost,"err");
+        toast("💀 Dano total! Backdoor instalado.");
+        showAlert("💀 BACKDOOR INSTALADO","Invasor deixou acesso permanente. Compre IDS/IPS para remover.");
+        finishInvasion();
+      },1500);
+    },800);
+  }
+}
+
+function finishInvasion(){
+  _invasionActive=false; _invasionStep=0; _mission=null;
+  updateUI();
+  setTimeout(()=>{document.getElementById("modal-bg").classList.remove("open");},3500);
+}
+
+// remover backdoor ao comprar IDS
+function checkBackdoorRemoval(){
+  if(S._backdoor&&S.owned.has("ids")){
+    S._backdoor=false;
+    log("> IDS/IPS removeu o backdoor do sistema!","ok");
+    toast("✅ Backdoor removido pelo IDS!");
+  }
+}
+
+// REDE SOCIAL
+const SOCIAL_BIOS=["novato no submundo. ainda aprendendo.","explorando os limites da rede.","informação é poder. poder é tudo.","anônimo. onipresente. inevitável.","o sistema tem falhas. eu as encontro.","eles constroem paredes. eu acho portas."];
+const HACK_POSTS={
+  wifi:["derrubei o wi-fi do vizinho por curiosidade. senha era '12345678' 💀","wi-fi do andar de cima cairia agora. não fui eu... 👀","estudando redes sem fio. interessante o que se aprova por aí."],
+  phish:["psicologia é a maior vulnerabilidade humana. não cliquem em tudo.","engenharia social > zero day na maioria dos casos.","as pessoas confiam demais em e-mails. é triste e útil."],
+  scrape:["dados são o novo petróleo. e tô refinando bastante hoje.","algumas empresas guardam dados como se fossem ouro. até que não são.","OSINT é subestimado. vocês não imaginam o que é público."],
+  ransom:["empresas sem backup em 2024. ainda existe isso. confirmado.","segurança é custo até virar prejuízo. aí lembram de mim.","patch Tuesday ignorado. disaster Wednesday chegou."],
+};
+const TUTORIAL_POSTS=[
+  "thread: como identificar phishing em 5 segundos 🧵","nmap básico para iniciantes — aprendi hoje, compartilhando","por que senhas fracas ainda existem em 2024? uma análise","VPN não é anonimato total. thread explicando o porquê","o que é um ataque man-in-the-middle? explicação simples","top 5 erros de segurança que toda empresa comete","como o wi-fi público pode te trair (e como se proteger)","Kali Linux: por onde começar? meu caminho pessoal",
+];
+
+function getSocialBio(){
+  if(S.social.followers>5000)return"elite hacker. eles me procuram, não o contrário.";
+  if(S.social.followers>1000)return"informação é poder. poder é tudo.";
+  if(S.social.followers>300)return"explorando os limites da rede. anônimo.";
+  if(S.social.followers>50)return"aprendendo as artes do submundo digital.";
+  return"novato no submundo. ainda aprendendo.";
+}
+
+function addFeedItem(text,isDonation=false){
+  const time=["agora","1min","2min","5min"][Math.floor(Math.random()*4)];
+  const likes=Math.floor(Math.random()*S.social.followers/3+1);
+  S.social.feedItems.unshift({text,isDonation,time,likes});
+  if(S.social.feedItems.length>20)S.social.feedItems.pop();
+}
+
+function updateSocial(){
+  document.getElementById("soc-followers").textContent=S.social.followers>=1000?(S.social.followers/1000).toFixed(1)+"k":S.social.followers;
+  document.getElementById("soc-donations").textContent="R$"+S.social.donations;
+  document.getElementById("soc-posts").textContent=S.social.posts;
+  document.getElementById("social-bio").textContent=getSocialBio();
+  const feed=document.getElementById("social-feed");
+  if(S.social.feedItems.length===0){feed.innerHTML=`<div style="color:#484f58;font-size:10px;text-align:center;padding:20px 0">nenhum post ainda</div>`;return;}
+  feed.innerHTML=S.social.feedItems.map(fi=>`
+    <div class="feed-item">
+      <span class="fi-handle">@ghost_zero</span><span class="fi-time">${fi.time}</span><br>
+      ${fi.isDonation?`<span class="fi-donation">💸 ${fi.text}</span>`:fi.text}
+      ${!fi.isDonation?`<span class="fi-likes">❤️ ${fi.likes}</span>`:""}
+    </div>`).join("");
+  // mostrar botão postar hack se teve hack recente
+  document.getElementById("btn-post-hack").style.display=S.social.lastHack&&!S.cds.social_posthack?"":"none";
+}
+
+function gainFollowers(n){
+  S.social.followers+=n;
+  // chance de doação proporcional aos seguidores
+  if(S.social.followers>20&&Math.random()<0.15){
+    const donation=Math.round(5+Math.random()*S.social.followers*0.02);
+    S.money+=donation;S.social.donations+=donation;
+    addFeedItem("alguém doou R$"+donation+" via PIX anônimo! 🙏",true);
+    toast("💸 Doação! +R$"+donation);
+    log("> doação recebida: R$"+donation+" via seguidores","ok");
+  }
+}
+
+// postar sobre hack (aparece após cada hack)
+function setupSocialButtons(){
+  document.getElementById("btn-post-hack").onclick=()=>{
+    if(S.cds.social_posthack||!S.social.lastHack)return;
+    const posts=HACK_POSTS[S.social.lastHack]||["mais um dia de trabalho no submundo."];
+    const post=posts[Math.floor(Math.random()*posts.length)];
+    const newFollowers=Math.round(3+Math.random()*12);
+    gainFollowers(newFollowers);S.social.posts++;
+    addFeedItem(post);
+    log("> postou sobre hack → +"+newFollowers+" seguidores","ok");
+    toast("🐦 +"+newFollowers+" seguidores!");
+    S.cds.social_posthack=true;S.social.lastHack=null;
+    setTimeout(()=>{delete S.cds.social_posthack;updateSocial();},6000);
+    updateUI();
+  };
+  document.getElementById("btn-post-tutorial").onclick=()=>{
+    if(S.cds.social_tutorial)return;
+    const post=TUTORIAL_POSTS[Math.floor(Math.random()*TUTORIAL_POSTS.length)];
+    const newFollowers=Math.round(1+Math.random()*8);
+    gainFollowers(newFollowers);S.social.posts++;
+    addFeedItem(post);
+    log("> tutorial postado → +"+newFollowers+" seguidores","ok");
+    toast("🧵 +"+newFollowers+" seguidores!");
+    S.cds.social_tutorial=true;
+    setTimeout(()=>{delete S.cds.social_tutorial;document.getElementById("btn-post-tutorial").querySelector(".btn-req")&&updateUI();},8000);
+    updateUI();
+  };
+}
+
+// MISSÕES ESPECIAIS
+const MISSIONS=[
+  {id:"linux_noob",t:"Invadir servidor Linux novato",s:"credenciais fracas, alvo descuidado",
+   reward:"+R$150 · +50xp · rep +6",m:150,xp:50,rep:6,heat:15,
+   hints:["tenta o usuário mais óbvio","senha de preguiçoso...","usuário: admin  senha: admin"]},
+  {id:"crypto_airdrop",t:"Phishing: Crypto Airdrop",s:"fingir ser projeto famoso, roubar carteiras",
+   reward:"+R$320 · +70xp · rep +8",m:320,xp:70,rep:8,heat:18,
+   hints:["qual projeto crypto mais famoso do momento?","o domínio precisa parecer oficial — troca uma letra","a carteira destino tem que parecer legítima"]},
+  {id:"honeytrap_gps",t:"Armadilha: Foto Vazada",s:"isca digital com rastreador GPS — alvo para a polícia",
+   reward:"+R$0 · +80xp · rep +15 · risco -10%",m:0,xp:80,rep:15,heat:-10,
+   hints:["o link precisa parecer tentador e real","o pixel de rastreio é invisível na imagem","ao abrir, captura IP + GPS e envia direto para a delegacia"]},
+  {id:"blackout",t:"Operação Blackout",s:"hackear o Banco Central — e escapar da polícia",
+   reward:"+R$1.800 · +120xp · rep +20 · decisão sob pressão",m:0,xp:0,rep:0,heat:0,lvl:5,
+   hints:["Log4Shell é a vulnerabilidade mais famosa de 2021","extraia o que vale mais: chaves de API","quando a polícia chegar, decida rápido — o tempo corre"]},
+];
+
+function renderMissions(){
+  const c=document.getElementById("mission-actions");c.innerHTML="";
+  for(const m of MISSIONS){
+    const done=S.doneMissions.has(m.id);
+    const locked=m.lvl&&S.level<m.lvl;
+    const btn=document.createElement("div");btn.className="action-btn"+(done||locked?" disabled":"");
+    if(done)btn.style.borderColor="#238636";
+    btn.innerHTML=`<div class="btn-title">${done?"✓ ":""}${m.t}</div><div class="btn-sub">${m.s}</div>
+      <div class="btn-reward">${done?"concluída":m.reward}</div>
+      ${locked?`<div class="btn-req">🔒 nível ${m.lvl}</div>`:""}
+      ${!done&&!locked?`<div class="btn-req" style="color:#79c0ff">▶ missão interativa</div>`:""}`;
+    if(!done&&!locked)btn.onclick=()=>m.id==="blackout"?startBlackoutMission():openMission(m.id);
+    c.appendChild(btn);
+  }
+}
+
+// FREELANCE
+const FREELANCE=[
+  {id:"fix_site",t:"Corrigir site derrubado",s:"e-commerce sem vender há 2h",m:180,bonus:60,xp:40,rep:3,cd:12000},
+  {id:"config_fw",t:"Configurar firewall",s:"empresa pequena, Linux",m:220,xp:55,rep:4,cd:15000,lvl:2},
+  {id:"pentest",t:"Pentest autorizado",s:"cliente pagou pelo teste",m:400,bonus:100,xp:80,rep:6,cd:20000,lvl:3},
+];
+
+function renderFreelance(){
+  const c=document.getElementById("freelance-actions");c.innerHTML="";
+  for(const a of FREELANCE){
+    const locked=a.lvl&&S.level<a.lvl,cd=!!S.cds["fl_"+a.id];
+    const btn=document.createElement("div");btn.className="action-btn"+(locked||cd?" disabled":"");
+    btn.innerHTML=`<div class="btn-title">${a.t}</div><div class="btn-sub">${a.s}</div>
+      <div class="btn-reward">+R$${a.m+(a.bonus||0)}${a.bonus?" (bônus R$"+a.bonus+")":""} · +${a.xp}xp</div>
+      ${locked?`<div class="btn-req">🔒 nível ${a.lvl}</div>`:""}
+      ${cd?`<div class="btn-req">⏳ próximo cliente…</div>`:""}`;
+    if(!locked&&!cd)btn.onclick=()=>{
+      S.money+=a.m+(a.bonus||0);gainXP(a.xp);S.rep+=a.rep;
+      log("> freelance: "+a.t+" → R$"+(a.m+(a.bonus||0))+(a.bonus?" (bônus!)":""),"ok");
+      if(a.bonus)toast("🎉 Bônus! +R$"+a.bonus);
+      S.cds["fl_"+a.id]=true;setTimeout(()=>{delete S.cds["fl_"+a.id];renderFreelance();},a.cd);
+      updateUI();
+    };
+    c.appendChild(btn);
+  }
+}
+
+// BLOG
+function renderBlog(){
+  const sec=document.getElementById("blog-section"),lbl=document.getElementById("blog-status-label");
+  if(!S.blog.created){
+    lbl.textContent="não criado";lbl.style.color="#484f58";
+    sec.innerHTML=`<div style="font-size:10px;color:#484f58;margin-bottom:8px">Crie um blog técnico. Posts sobre segurança e Linux geram renda passiva com anúncios.</div>
+    <div class="action-btn" id="create-blog-btn"><div class="btn-title">🌐 Criar blog técnico</div><div class="btn-sub">domínio + hospedagem</div><div class="btn-reward">custo R$50 · renda passiva</div></div>`;
+    document.getElementById("create-blog-btn").onclick=createBlog;
+    return;
+  }
+  const inc=Math.round(S.blog.posts*2.5*(1+S.blog.visitors/200));
+  lbl.textContent="ativo · "+S.blog.posts+" posts";lbl.style.color="#3fb950";
+  sec.innerHTML=`<div style="background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 12px;margin-bottom:8px">
+    <div class="blog-stat"><span style="color:#484f58">posts</span><span style="color:#e6edf3">${S.blog.posts}</span></div>
+    <div class="blog-stat"><span style="color:#484f58">visitantes/dia</span><span style="color:#58a6ff">${S.blog.visitors}</span></div>
+    <div class="blog-stat"><span style="color:#484f58">renda/ciclo</span><span style="color:#3fb950">R$${inc}</span></div>
+    <div class="blog-stat"><span style="color:#484f58">total ganho</span><span style="color:#3fb950">R$${S.blog.income}</span></div>
+  </div>
+  <div class="actions-grid">
+    <div class="action-btn${S.cds.blog_post?" disabled":""}" id="btn-write"><div class="btn-title">✍️ Escrever post</div><div class="btn-sub">tutorial, write-up</div><div class="btn-reward">+visitantes · +renda</div>${S.cds.blog_post?`<div class="btn-req">⏳ escrevendo…</div>`:""}</div>
+    <div class="action-btn${S.cds.blog_share?" disabled":""}" id="btn-share"><div class="btn-title">📣 Divulgar</div><div class="btn-sub">Reddit, fóruns</div><div class="btn-reward">+visitantes rápido</div>${S.cds.blog_share?`<div class="btn-req">⏳ aguarde…</div>`:""}</div>
+  </div>`;
+  if(!S.cds.blog_post)document.getElementById("btn-write").onclick=()=>{
+    S.blog.posts++;S.blog.visitors+=Math.round(15+Math.random()*20);gainXP(15);
+    log("> post publicado!","ok");toast("✍️ Post publicado!");
+    S.cds.blog_post=true;setTimeout(()=>{delete S.cds.blog_post;renderBlog();},8000);updateUI();
+  };
+  if(!S.cds.blog_share)document.getElementById("btn-share").onclick=()=>{
+    S.blog.visitors+=Math.round(30+Math.random()*40);
+    log("> blog divulgado — pico de visitantes!","ok");toast("📣 +visitantes!");
+    S.cds.blog_share=true;setTimeout(()=>{delete S.cds.blog_share;renderBlog();},10000);renderBlog();
+  };
+}
+
+function createBlog(){
+  if(S.money<50){toast("Precisa de R$50.");return;}
+  S.money-=50;S.blog.created=true;
+  log("> blog criado! escreva posts para ganhar renda passiva.","ok");toast("🌐 Blog criado!");
+  updateUI();
+  setInterval(()=>{
+    if(!S.blog.created||S.blog.posts===0)return;
+    const inc=Math.round(S.blog.posts*2.5*(1+S.blog.visitors/200));
+    if(inc>0){S.money+=inc;S.blog.income+=inc;updateUI();}
+  },15000);
+}
+
+// CURSOS
+const COURSES=[
+  {id:"linux",n:"Linux Essentials (LPI)",icon:"🐧",p:40,dur:8000,xp:60,bonus:"poder +0.3",effect:()=>{S.power=+(S.power+0.3).toFixed(1);}},
+  {id:"python",n:"Python para Hackers",icon:"🐍",p:55,dur:10000,xp:80,bonus:"poder +0.5",effect:()=>{S.power=+(S.power+0.5).toFixed(1);}},
+  {id:"ceh",n:"CEH — Certified Ethical Hacker",icon:"🎓",p:180,dur:20000,xp:150,bonus:"poder ×1.5 · rep +10",lvl:3,effect:()=>{S.power=+(S.power*1.5).toFixed(1);S.rep+=10;}},
+  {id:"comptia",n:"CompTIA Security+",icon:"🔐",p:150,dur:18000,xp:120,bonus:"defesa +20% · rep +8",lvl:2,effect:()=>{S.defense=Math.min(100,S.defense+20);S.rep+=8;}},
+  {id:"oswp",n:"OSWP — Offensive Security",icon:"📡",p:220,dur:25000,xp:200,bonus:"poder ×2",lvl:4,effect:()=>{S.power=+(S.power*2).toFixed(1);}},
+  {id:"sans",n:"Firewall & IDS (SANS)",icon:"🧱",p:130,dur:15000,xp:100,bonus:"defesa +30%",lvl:2,effect:()=>{S.defense=Math.min(100,S.defense+30);}},
+];
+
+function renderCourses(){
+  const c=document.getElementById("course-grid");c.innerHTML="";
+  for(const co of COURSES){
+    const done=S.courses[co.id]==="done",inp=S.courses[co.id]==="progress";
+    const locked=co.lvl&&S.level<co.lvl,cantAfford=!done&&!inp&&S.money<co.p;
+    const el=document.createElement("div");
+    el.className="course-item"+(done?" done":inp?" inprogress":cantAfford||locked?" cant-afford":"");
+    el.innerHTML=`<div style="display:flex;gap:7px;align-items:center;margin-bottom:4px">
+      <span style="font-size:18px">${co.icon}</span>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:${done?"#3fb950":inp?"#e3b341":"#e6edf3"}">${done?"✓ ":""}${co.n}</div>
+        <div style="font-size:9px;color:#484f58">${done?"concluído":inp?"estudando… ⏳":"R$"+co.p}</div>
+      </div>
+    </div>
+    <div style="font-size:9px;color:#484f58">${co.bonus}</div>
+    ${locked?`<div style="font-size:9px;color:#e3b341;margin-top:3px">🔒 nível ${co.lvl}</div>`:""}`;
+    if(!done&&!inp&&!cantAfford&&!locked)el.onclick=()=>startCourse(co);
+    c.appendChild(el);
+  }
+}
+
+function startCourse(co){
+  if(S.money<co.p){toast("Sem grana.");return;}
+  S.money-=co.p;S.courses[co.id]="progress";
+  log("> curso iniciado: "+co.n,"warn");toast("🎓 Estudando: "+co.n);
+  updateUI();
+  setTimeout(()=>{
+    S.courses[co.id]="done";co.effect();gainXP(co.xp);
+    log("> curso concluído: "+co.n+" | "+co.bonus,"ok");toast("🎓 Concluído: "+co.n+"!");
+    updateUI();
+  },co.dur);
+}
+
+// DELIVERY
+const DELIVERY=[
+  {id:"pizza",t:"Delivery de pizza",s:"pedido próximo",m:12,xp:5,heat:-3,cd:2500},
+  {id:"moto",t:"Rota de moto",s:"3 entregas seguidas",m:30,xp:12,heat:-7,cd:5000},
+  {id:"coleta",t:"Coleta suspeita",s:"peças sem perguntas",m:65,xp:8,heat:-2,cd:8000},
+];
+
+function renderDelivery(){
+  const c=document.getElementById("delivery-actions");c.innerHTML="";
+  for(const a of DELIVERY){
+    const cd=!!S.cds["d_"+a.id];
+    const bonus=(S.owned.has("moto_prop")?1.5:1)*(S.owned.has("ifood_pro")?1.3:1);
+    const earn=Math.round(a.m*bonus);
+    const btn=document.createElement("div");btn.className="action-btn"+(cd?" disabled":"");
+    btn.innerHTML=`<div class="btn-title">${a.t}</div><div class="btn-sub">${a.s}</div>
+      <div class="btn-reward">+R$${earn} · +${a.xp}xp · risco ${a.heat}%</div>
+      ${cd?`<div class="btn-req">⏳ na estrada…</div>`:""}`;
+    if(!cd)btn.onclick=()=>{
+      S.money+=earn;gainXP(a.xp);S.heat=Math.max(0,S.heat+a.heat);
+      log("> delivery: "+a.t+" → R$"+earn,"dim");
+      S.cds["d_"+a.id]=true;setTimeout(()=>{delete S.cds["d_"+a.id];renderDelivery();},a.cd);
+      updateUI();
+    };
+    c.appendChild(btn);
+  }
+}
+
+// SHOP
+const SHOP={
+  atk:[
+    {id:"ram",n:"RAM 16GB",icon:"🧠",p:80,bonus:"poder ×1.5",effect:()=>{S.power=+(S.power*1.5).toFixed(1);}},
+    {id:"gpu",n:"GPU usada",icon:"🖥️",p:160,bonus:"poder ×2",effect:()=>{S.power=+(S.power*2).toFixed(1);}},
+    {id:"server",n:"Servidor VPS",icon:"🗄️",p:220,bonus:"poder ×3 +rep",effect:()=>{S.power=+(S.power*3).toFixed(1);S.rep+=10;}},
+    {id:"antena",n:"Antena Wi-Fi",icon:"📡",p:90,bonus:"hacks +20%",effect:()=>{}},
+  ],
+  def:[
+    {id:"firewall",n:"Firewall básico",icon:"🧱",p:50,bonus:"defesa +20%",effect:()=>{S.defense=Math.min(100,S.defense+20);}},
+    {id:"vpn",n:"VPN Pro",icon:"🔒",p:80,bonus:"defesa +25% · risco -15%",effect:()=>{S.defense=Math.min(100,S.defense+25);S.heat=Math.max(0,S.heat-15);}},
+    {id:"antivirus",n:"Antivírus",icon:"🦠",p:60,bonus:"dano phishing -50%",effect:()=>{}},
+    {id:"emailscanner",n:"Scanner de E-mail",icon:"🔍",p:90,bonus:"detecta phishing",effect:()=>{log("> scanner de e-mail instalado!","ok");}},
+    {id:"proxychains",n:"ProxyChains",icon:"🌐",p:120,bonus:"defesa +30%",effect:()=>{S.defense=Math.min(100,S.defense+30);}},
+    {id:"ids",n:"IDS/IPS",icon:"👁️",p:180,bonus:"defesa +25%",effect:()=>{S.defense=Math.min(100,S.defense+25);}},
+  ],
+  del:[
+    {id:"moto_prop",n:"Moto própria",icon:"🏍️",p:130,bonus:"delivery +50%",effect:()=>{}},
+    {id:"ifood_pro",n:"iFood Pro",icon:"📱",p:70,bonus:"delivery +30%",effect:()=>{}},
+  ]
+};
+
+function setShopTab(tab,el){S.shopTab=tab;document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");renderShop();}
+function renderShop(){
+  const c=document.getElementById("shop");c.innerHTML="";
+  for(const item of (SHOP[S.shopTab]||[])){
+    const owned=S.owned.has(item.id),cantAfford=!owned&&S.money<item.p;
+    const el=document.createElement("div");el.className="shop-item"+(owned?" owned":"")+(cantAfford?" cant-afford":"");
+    el.innerHTML=`<div class="item-icon">${item.icon}</div><div class="item-name">${item.n}</div><div class="item-price">${owned?"✓ instalado":"R$"+item.p}</div><div class="item-bonus">${item.bonus}</div>`;
+    if(!owned&&!cantAfford)el.onclick=()=>{
+      S.money-=item.p;S.owned.add(item.id);item.effect();
+      log("> upgrade: "+item.n,"ok");toast("✓ "+item.n+"!");
+      // upgrades de ataque reduzem degradação
+      if(["ram","gpu","server","antena"].includes(item.id)){
+        let reduced=0;
+        for(const id in S.hackCycles){if(S.hackCycles[id]>0){S.hackCycles[id]=Math.max(0,S.hackCycles[id]-1);reduced++;}}
+        if(reduced>0)log("> upgrade melhorou abordagem — alvos menos desconfiados","ok");
+      }
+      checkBackdoorRemoval();updateUI();
+    };
+    c.appendChild(el);
+  }
+}
+
+// MODAL MISSÃO
+let _mission=null,_step=0,_user="",_hint=0;
+function mlog(m,c=""){const t=document.getElementById("mterm");const d=document.createElement("div");d.className="ml "+c;d.textContent=m;t.appendChild(d);t.scrollTop=t.scrollHeight;}
+function openMission(id){
+  _mission=id;_step=0;_user="";_hint=0;
+  document.getElementById("mterm").innerHTML="";
+  document.getElementById("modal-title").textContent=MISSIONS.find(m=>m.id===id).t;
+  document.getElementById("minput").value="";document.getElementById("minput").type="text";
+  document.getElementById("minput-row").style.display="flex";
+  document.getElementById("modal-bg").classList.add("open");
+
+  if(id==="linux_noob"){
+    mlog("connecting to 192.168.1.47:22 ...","dim");
+    setTimeout(()=>{
+      mlog("SSH-2.0-OpenSSH_7.4p1 Ubuntu 18.04","dim");
+      mlog("","");mlog("┌──────────────────────────────────┐","sys");
+      mlog("│  Ubuntu 18.04 LTS — jrsilva-dev  │","sys");
+      mlog("└──────────────────────────────────┘","sys");
+      mlog("","");mlog("Autenticação necessária.","");mlog("","");
+      document.getElementById("mprompt").textContent="login: ";
+      document.getElementById("minput").focus();
+    },700);
+  } else if(id==="honeytrap_gps"){
+    mlog("// OPERAÇÃO: ARMADILHA DIGITAL — COLABORAÇÃO POLICIAL","sys");
+    mlog("","");
+    mlog("Objetivo: criar um link isca com pixel rastreador.","");
+    mlog("Quando o alvo abrir, captura IP + GPS e envia","");
+    mlog("automaticamente para a central da delegacia.","");
+    mlog("","");
+    mlog("PASSO 1/3 — Escolha a isca (o que vai atrair o alvo):","warn");
+    mlog("  [1] Foto vazada de celebridade","dim");
+    mlog("  [2] Suposto vídeo privado","dim");
+    mlog("  [3] 'Achei seu nome numa lista...'","dim");
+    mlog("","");
+    document.getElementById("mprompt").textContent="escolha (1-3): ";
+    document.getElementById("minput").focus();
+  } else if(id==="crypto_airdrop"){
+    mlog("// OPERAÇÃO: CRYPTO AIRDROP PHISHING","sys");
+    mlog("","");
+    mlog("Você vai montar um e-mail falso fingindo ser um","");
+    mlog("projeto crypto famoso oferecendo tokens grátis.","");
+    mlog("Vítimas clicam, conectam a carteira, perdem tudo.","");
+    mlog("","");
+    mlog("PASSO 1/3 — Escolha o projeto que vai imitar:","warn");
+    mlog("  [1] Ethereum Foundation","dim");
+    mlog("  [2] Binance","dim");
+    mlog("  [3] Solana","dim");
+    mlog("  [4] Shiba Inu","dim");
+    mlog("","");
+    document.getElementById("mprompt").textContent="escolha (1-4): ";
+    document.getElementById("minput").focus();
+  }
+}
+
+document.getElementById("modal-close").onclick=()=>{document.getElementById("modal-bg").classList.remove("open");_mission=null;};
+document.getElementById("hint-btn").onclick=()=>{
+  if(!_mission)return;const m=MISSIONS.find(x=>x.id===_mission);
+  mlog("> dica: "+m.hints[Math.min(_hint,m.hints.length-1)],"warn");_hint=Math.min(_hint+1,m.hints.length-1);
+};
+document.getElementById("msubmit").onclick=submitMission;
+document.getElementById("minput").addEventListener("keydown",e=>{if(e.key==="Enter")submitMission();});
+
+function submitMission(){
+  if(!_mission)return;
+  const val=document.getElementById("minput").value.trim();if(!val)return;
+  if(_mission==="__invasion__"){submitInvasionReaction();return;}
+  if(_mission==="vx_technova"){submitTechNova();return;}
+  if(_mission==="blackout"){
+    if(_blackoutPhase===1)submitBlackout();
+    else if(_blackoutPhase===2)submitBlackoutEscape();
+    return;
+  }
+
+  // ---- MISSÃO: linux_noob ----
+  if(_mission==="linux_noob"){
+    if(_step===0){
+      mlog("login: "+val,"");_user=val.toLowerCase();
+      document.getElementById("minput").value="";
+      document.getElementById("mprompt").textContent="senha: ";
+      document.getElementById("minput").type="password";
+      _step=1;
+    } else if(_step===1){
+      mlog("senha: ••••••••","");const pass=val.toLowerCase();
+      document.getElementById("minput").type="text";
+      document.getElementById("minput-row").style.display="none";
+      setTimeout(()=>mlog("verificando…","dim"),200);
+      setTimeout(()=>{
+        if(_user==="admin"&&pass==="admin"){
+          mlog("","");mlog("Acesso concedido.","ok");
+          setTimeout(()=>{mlog("$ whoami","sys");setTimeout(()=>mlog("root","warn"),300);},500);
+          setTimeout(()=>mlog("$ ls /home/jrsilva","sys"),900);
+          setTimeout(()=>mlog("projetos/  .ssh/  senhas.txt  backup/",""),1300);
+          setTimeout(()=>mlog("$ cat senhas.txt","sys"),1800);
+          setTimeout(()=>{mlog("bradesco: jrsilva92 / pele1970","warn");mlog("nubank: jrsilva / minhasenha123","warn");},2300);
+          setTimeout(()=>completeMission(3000),3000);
+        } else {
+          mlog("","");mlog("Acesso negado.","err");mlog("","");
+          setTimeout(()=>{
+            mlog(_user!=="admin"?"dica: usuário incorreto":"dica: usuário correto, senha errada","warn");
+            mlog("","");setTimeout(()=>resetMissionInput("login: ",0),700);
+          },500);
+        }
+      },900);
+    }
+    return;
+  }
+
+  // ---- MISSÃO: honeytrap_gps ----
+  if(_mission==="honeytrap_gps"){
+    const ISCAS={"1":"Foto vazada de celebridade","2":"Vídeo privado","3":"Lista com seu nome"};
+    if(_step===0){
+      if(!ISCAS[val]){mlog("opção inválida. escolha 1, 2 ou 3.","err");document.getElementById("minput").value="";return;}
+      _user=val;
+      mlog("escolha: "+ISCAS[val],"");
+      mlog("","");
+      mlog("PASSO 2/3 — Nome do domínio isca:","warn");
+      mlog("precisa parecer real. ex: fotos-privadas.net","dim");
+      mlog("","");
+      document.getElementById("mprompt").textContent="domínio: ";
+      document.getElementById("minput").value="";_step=1;
+    } else if(_step===1){
+      if(val.length<5){mlog("domínio muito curto.","err");document.getElementById("minput").value="";return;}
+      _user=_user+"||"+val;
+      mlog("domínio: "+val,"");
+      mlog("","");
+      mlog("PASSO 3/3 — Mensagem de envio para o alvo:","warn");
+      mlog("ex: 'ei, achei isso aqui te procurando 👀'","dim");
+      mlog("","");
+      document.getElementById("mprompt").textContent="mensagem: ";
+      document.getElementById("minput").value="";_step=2;
+    } else if(_step===2){
+      if(val.length<5){mlog("mensagem muito curta.","err");document.getElementById("minput").value="";return;}
+      const parts=_user.split("||");
+      const isca=ISCAS[parts[0]],domain=parts[1];
+      document.getElementById("minput-row").style.display="none";
+      mlog("mensagem: \""+val+"\"","");
+      mlog("","");
+      setTimeout(()=>mlog("gerando pixel rastreador invisível…","dim"),400);
+      setTimeout(()=>mlog("injetando captura de GPS no carregamento…","dim"),1000);
+      setTimeout(()=>mlog("empacotando com isca: "+isca+"…","dim"),1700);
+      setTimeout(()=>{
+        mlog("","");
+        mlog("┌──────────────────────────────────────────┐","sys");
+        mlog("│  LINK GERADO                             │","sys");
+        mlog("│  http://"+domain+"/ver              │","sys");
+        mlog("│  isca: "+isca.padEnd(34)+"│","sys");
+        mlog("│  rastreio: GPS + IP + device fingerprint │","sys");
+        mlog("└──────────────────────────────────────────┘","sys");
+      },2400);
+      setTimeout(()=>{
+        mlog("","");mlog("link enviado ao alvo via canal anônimo…","warn");
+      },3200);
+      setTimeout(()=>mlog("aguardando abertura…","dim"),4000);
+      setTimeout(()=>{
+        mlog("","");
+        mlog("[!] LINK ABERTO — capturando dados…","ok");
+        mlog("IP: 189.47.xx.xx — São Paulo, SP","ok");
+        mlog("GPS: -23.5505° S, -46.6333° W","ok");
+        mlog("device: Android 13 / Chrome 124","ok");
+      },5200);
+      setTimeout(()=>{
+        mlog("","");
+        mlog("transmitindo para central da delegacia…","warn");
+      },6200);
+      setTimeout(()=>{
+        mlog("","");
+        mlog(">>> DADOS RECEBIDOS PELA POLÍCIA","ok");
+        mlog(">>> MANDADO DE BUSCA EMITIDO","ok");
+        mlog("+80xp · rep +15 · risco -10%","ok");
+        mlog("\"bom trabalho, ghost_zero.\" — Del. Carvalho","sys");
+        completeMission(3000);
+      },7500);
+    }
+    return;
+  }
+  if(_mission==="crypto_airdrop"){
+    const PROJECTS={"1":"Ethereum Foundation","2":"Binance","3":"Solana","4":"Shiba Inu"};
+    const DOMAINS={"1":"ethereeum-airdrop.io","2":"binanc3-drop.com","3":"soIana-gift.net","4":"shibaairdrop.xyz"};
+    const WALLETS=["0x71C7656EC7ab88b098defB751B7401B5f6d8976F","bc1qxy2kgdygjrsqtzq2n0yrf249","addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7z"];
+
+    if(_step===0){
+      if(!PROJECTS[val]){mlog("opção inválida. escolha 1, 2, 3 ou 4.","err");document.getElementById("minput").value="";return;}
+      _user=val;
+      mlog("escolha (1-4): "+val+" → "+PROJECTS[val],"");
+      mlog("","");
+      mlog("PASSO 2/3 — Domínio falso para o site de coleta:","warn");
+      mlog("sugestão: "+DOMAINS[val],"dim");
+      mlog("(confirme digitando o domínio ou invente um parecido)","dim");
+      mlog("","");
+      document.getElementById("mprompt").textContent="domínio: ";
+      document.getElementById("minput").value="";_step=1;
+    } else if(_step===1){
+      const domain=val.toLowerCase();
+      const real=["ethereum.org","binance.com","solana.com","shibatoken.com"];
+      if(real.some(r=>domain===r)){
+        mlog("domínio: "+domain,"");
+        mlog("ERRO: esse é o domínio REAL. use um fake parecido!","err");
+        mlog("ex: trocar letra, adicionar '-airdrop', '.io'…","warn");
+        document.getElementById("minput").value="";return;
+      }
+      if(domain.length<5){mlog("domínio muito curto.","err");document.getElementById("minput").value="";return;}
+      _user=_user+"||"+domain;
+      mlog("domínio: "+domain,"");
+      mlog("","");
+      mlog("PASSO 3/3 — Carteira crypto destino (onde cai o dinheiro):","warn");
+      mlog("(pode inventar ou usar um endereço qualquer)","dim");
+      mlog("ex: 0x71C7656EC7ab88b098defB751B7401B5f6d8976F","dim");
+      mlog("","");
+      document.getElementById("mprompt").textContent="wallet: ";
+      document.getElementById("minput").value="";_step=2;
+    } else if(_step===2){
+      const wallet=val;
+      if(wallet.length<10){mlog("wallet inválida — muito curta.","err");document.getElementById("minput").value="";return;}
+      const parts=_user.split("||");
+      const proj=PROJECTS[parts[0]];const domain=parts[1];
+      document.getElementById("minput-row").style.display="none";
+      mlog("wallet: "+wallet.substring(0,16)+"…","");
+      mlog("","");
+      setTimeout(()=>mlog("compilando e-mail de phishing…","dim"),300);
+      setTimeout(()=>{
+        mlog("","");
+        mlog("┌─────────────────────────────────────────┐","sys");
+        mlog("│  DE: noreply@"+domain.padEnd(28)+"│","sys");
+        mlog("│  ASSUNTO: 🎁 "+proj+" Airdrop — ÚLTIMAS HORAS!","sys");
+        mlog("├─────────────────────────────────────────┤","sys");
+        mlog("│  Você foi selecionado para receber      │","sys");
+        mlog("│  1.500 tokens GRÁTIS.                   │","sys");
+        mlog("│                                         │","sys");
+        mlog("│  >> Conecte sua carteira AGORA <<       │","sys");
+        mlog("│  http://"+domain+"/claim              │","sys");
+        mlog("└─────────────────────────────────────────┘","sys");
+      },800);
+      setTimeout(()=>{
+        mlog("","");mlog("disparando para lista de 4.200 emails…","warn");
+      },1800);
+      setTimeout(()=>{
+        mlog("12 carteiras conectadas…","dim");
+        mlog("89 carteiras conectadas…","dim");
+        mlog("247 carteiras conectadas…","ok");
+      },2800);
+      setTimeout(()=>{
+        mlog("","");
+        mlog("drenando fundos → "+wallet.substring(0,16)+"…","warn");
+      },3800);
+      setTimeout(()=>{
+        mlog("","");mlog(">>> OPERAÇÃO CONCLUÍDA","ok");
+        mlog("+R$320 · +70xp · rep +8","ok");
+        completeMission(2000);
+      },4800);
+    }
+    return;
+  }
+}
+
+function resetMissionInput(prompt,step){
+  _step=step;_user="";
+  document.getElementById("mprompt").textContent=prompt;
+  document.getElementById("minput").type="text";
+  document.getElementById("minput").value="";
+  document.getElementById("minput-row").style.display="flex";
+  document.getElementById("minput").focus();
+}
+
+function completeMission(closeDelay){
+  const m=MISSIONS.find(x=>x.id===_mission);
+  S.money+=m.m;gainXP(m.xp);S.rep+=m.rep;S.heat=Math.min(100,S.heat+m.heat);
+  S.doneMissions.add(m.id);
+  log("> missão concluída: "+m.t+" → R$"+m.m,"ok");
+  toast("🎯 Missão concluída! +R$"+m.m);
+  updateUI();renderMissions();
+  setTimeout(()=>{document.getElementById("modal-bg").classList.remove("open");_mission=null;},closeDelay);
+}
+
+// NOTÍCIAS
+const NEWS_ITEMS=[
+  {src:"TechCrunch BR",grp:"NullByte Crew",gcls:"tag-init",style:"background:#1a2a1a;color:#3fb950",h:"Grupo 'NullByte Crew' defacement 47 sites governamentais em uma noite",t:"há 2 dias"},
+  {src:"G1 Tecnologia",grp:"NullByte Crew",gcls:"tag-init",style:"background:#1a2a1a;color:#3fb950",h:"Hackers deixam mensagem política em portais municipais do interior de SP",t:"há 5 dias"},
+  {src:"The Hacker News",grp:"Phantom Syndicate",gcls:"tag-mid",style:"background:#1a1a2e;color:#58a6ff",h:"'Phantom Syndicate' vaza 2,3 milhões de registros de plano de saúde",t:"há 1 semana"},
+  {src:"Wired Brasil",grp:"Phantom Syndicate",gcls:"tag-mid",style:"background:#1a1a2e;color:#58a6ff",h:"Grupo intermediário coordena ataque DDoS contra três bancos simultaneamente",t:"há 1 semana"},
+  {src:"Reuters Tech",grp:"0xVoid",gcls:"tag-elite",style:"background:#2a0a2a;color:#a371f7",h:"'0xVoid' paralisa sistema de energia elétrica em cidade europeia por 4 horas",t:"há 2 semanas"},
+  {src:"BBC Tech",grp:"0xVoid",gcls:"tag-elite",style:"background:#2a0a2a;color:#a371f7",h:"Grupo elite 0xVoid considerado a maior ameaça cibernética do ano pela Interpol",t:"há 3 semanas"},
+  {src:"CNN Brasil",grp:"0xVoid",gcls:"tag-elite",style:"background:#2a0a2a;color:#a371f7",h:"FBI oferece recompensa de US$500k por informações sobre membros do 0xVoid",t:"há 1 mês"},
+  {src:"InfoMoney",grp:"TechNova",gcls:"tag-init",style:"background:#1a1500;color:#e3b341",h:"TechNova S.A. fecha contrato bilionário com Vortex Corp para gestão de dados financeiros",t:"há 4 meses"},
+  {src:"Valor Econômico",grp:"TechNova",gcls:"tag-init",style:"background:#1a1500;color:#e3b341",h:"Vortex Corp investigada pelo COAF por movimentações atípicas — empresa nega irregularidades",t:"há 2 meses"},
+  {src:"The Intercept BR",grp:"TechNova",gcls:"tag-init",style:"background:#1a1500;color:#e3b341",h:"Documentos mostram que TechNova processou R$2bi em transferências sem origem declarada",t:"há 1 mês"},
+];
+
+function renderNewsTab(){
+  const body=document.getElementById("phone-body");
+  body.innerHTML=NEWS_ITEMS.map(n=>`
+    <div class="news-item">
+      <div class="news-source">${n.src} <span class="news-group" style="${n.style}">${n.grp}</span></div>
+      <div class="news-headline">${n.h}</div>
+      <div class="news-time">${n.t}</div>
+    </div>`).join("");
+}
+
+// GRUPOS
+const GROUPS=[
+  {
+    id:"nullbyte",name:"NullByte Crew",tag:"INICIANTE",tagCls:"tag-init",
+    desc:"Grupo de hacktivistas jovens. Fazem defacement de sites, trollagem coordenada e vazamentos menores. Presença forte no Discord underground.",
+    reqLevel:3,reqRep:15,reqMission:null,
+    joinMsg:"Requisitos: nível 3 + reputação 15",
+    reward:{followers:200,power:0.3,xp:60},
+    missions:[
+      {id:"nb_defacement",t:"Defacement coordenado",s:"trocar página de prefeitura por manifesto",m:80,xp:30,rep:3,heat:8,cd:15000},
+      {id:"nb_dox",t:"Doxar influencer",s:"levantar dados pessoais públicos",m:120,xp:40,rep:4,heat:10,cd:20000},
+    ]
+  },
+  {
+    id:"phantom",name:"Phantom Syndicate",tag:"INTERMEDIÁRIO",tagCls:"tag-mid",
+    desc:"Grupo organizado com membros em vários países. Especialistas em vazamento de dados corporativos e ataques DDoS coordenados. Mencionados em relatórios de segurança.",
+    reqLevel:6,reqRep:40,reqMission:"linux_noob",
+    joinMsg:"Requisitos: nível 6 + rep 40 + missão linux_noob concluída",
+    reward:{followers:800,power:0.8,xp:120},
+    missions:[
+      {id:"ph_ddos",t:"DDoS em banco regional",s:"tirar sistema fora do ar por 2h",m:350,xp:70,rep:7,heat:15,cd:25000},
+      {id:"ph_leak",t:"Vazar dados corporativos",s:"dump + publicar no fórum",m:500,xp:90,rep:10,heat:18,cd:30000},
+    ]
+  },
+  {
+    id:"vxvoid",name:"0xVoid",tag:"ELITE",tagCls:"tag-elite",
+    desc:"O grupo mais temido do mundo. Operações globais, infraestrutura crítica. Mas o 0xVoid tem um objetivo maior — e ele tem a ver com você.",
+    reqLevel:10,reqRep:80,reqMission:null,reqGroup:"phantom",
+    joinMsg:"Convite exclusivo — nível 10 + rep 80 + membro do Phantom Syndicate",
+    reward:{followers:3000,power:2,xp:300},
+    missions:[
+      {id:"vx_infra",t:"Atacar infraestrutura crítica",s:"subestação elétrica — acesso root",m:1500,xp:200,rep:20,heat:30,cd:60000},
+      {id:"vx_gov",t:"Penetrar rede governamental",s:"ministério, sem deixar rastro",m:2000,xp:250,rep:25,heat:35,cd:90000},
+      {id:"vx_technova",t:"⚠ OPERAÇÃO VERDADE — TechNova",s:"infiltrar servidor, encontrar as provas",m:0,xp:500,rep:50,heat:40,cd:0,final:true},
+    ]
+  }
+];
+
+function canJoinGroup(g){
+  if(S.groups.member===g.id)return false;
+  if(S.level<g.reqLevel||S.rep<g.reqRep)return false;
+  if(g.reqMission&&!S.doneMissions.has(g.reqMission))return false;
+  if(g.reqGroup&&S.groups.member!==g.reqGroup)return false;
+  return true;
+}
+
+function joinGroup(g){
+  if(!canJoinGroup(g))return;
+  S.groups.member=g.id;
+  S.social.followers+=g.reward.followers;
+  S.power=+(S.power+g.reward.power).toFixed(1);
+  gainXP(g.reward.xp);
+  log("> ENTROU NO GRUPO: "+g.name+" | +"+g.reward.followers+" seguidores | poder +"+g.reward.power,"ok");
+  toast("🔥 Bem-vindo ao "+g.name+"!");
+  addFeedItem("acabei de ser aceito em um grupo que vocês conhecem. não vou dizer qual. 🫥");
+  const welcomeBody = g.id==="vxvoid"
+    ? "ghost_zero.\n\nVocê foi aceito.\n\nMas precisa saber o motivo real pelo qual te observamos.\n\nA TechNova S.A. não é só uma empresa de TI. Ela processa dados de transferências para a Vortex Corp — e para outras quatro corporações que usam esses dados para lavar dinheiro.\n\nVocê tinha acesso aos logs que provam isso. Eles sabiam.\n\nRodrigo Menezes foi pago R$80.000 pela diretoria da TechNova para te destruir antes que você percebesse o que estava vendo.\n\nNós temos parte das provas. Você vai conseguir o resto.\n\nA missão 'OPERAÇÃO VERDADE' está disponível.\n\nSeja bem-vindo.\n\n— 0x"
+    : "ghost_zero,\n\nVocê foi aceito no "+g.name+".\n\nNossas regras:\n1. Anonimato acima de tudo\n2. Sem deixar rastro\n3. O grupo não existe\n\nMissões exclusivas já estão disponíveis.\n\n— recrutamento";
+  setTimeout(()=>addEmail({
+    from: g.id==="vxvoid"?"0x000@void.onion":"recrutamento@"+g.id+".onion",
+    type:"info",
+    subject: g.id==="vxvoid"?"// a verdade sobre a TechNova //":"Bem-vindo, "+g.name,
+    time:"agora",
+    preview: g.id==="vxvoid"?"você foi demitido por um motivo maior...":"Você foi aceito...",
+    body:welcomeBody
+  }),2000);
+  if(g.id==="vxvoid"){
+    setTimeout(()=>{
+      log("> [0xVoid] a verdade está nos servidores da TechNova.","p");
+      log("> [0xVoid] missão OPERAÇÃO VERDADE desbloqueada.","p");
+      toast("💀 0xVoid revelou a verdade. Verifique o e-mail.");
+    },3000);
+  }
+  updateUI();
+}
+
+function doGroupMission(gid,m){
+  if(m.final){startTechNovaMission();return;}
+  if(S.cds["gm_"+m.id]||S.groups.completedGroupMissions.has(m.id))return;
+  S.money+=m.m;gainXP(m.xp);S.rep+=m.rep;S.heat=Math.min(100,S.heat+m.heat);
+  S.groups.completedGroupMissions.add(m.id);
+  log("> ["+gid+"] "+m.t+" → R$"+m.m+" | risco +"+m.heat+"%","cmd");
+  gainFollowers(Math.round(10+Math.random()*30));
+  S.cds["gm_"+m.id]=true;
+  setTimeout(()=>{delete S.cds["gm_"+m.id];renderGroups();},m.cd);
+  updateUI();
+}
+
+function renderGroups(){
+  const sec=document.getElementById("groups-section");sec.innerHTML="";
+  for(const g of GROUPS){
+    const isMember=S.groups.member===g.id;
+    const canJoin=canJoinGroup(g);
+    const alreadyHigher=GROUPS.findIndex(x=>x.id===S.groups.member)>GROUPS.findIndex(x=>x.id===g.id);
+    const card=document.createElement("div");
+    card.className="group-card"+(isMember?" member":canJoin||alreadyHigher?"":" locked");
+    let inner=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div><span class="group-name">${g.name}</span><span class="group-tag ${g.tagCls}">${g.tag}</span>${isMember?'<span class="group-tag tag-member">MEMBRO</span>':""}</div>
+    </div>
+    <div class="group-desc">${g.desc}</div>`;
+    if(!isMember&&!alreadyHigher){
+      inner+=`<div class="group-req">${g.joinMsg}</div>`;
+      const btn=document.createElement("button");
+      btn.className="group-join-btn";btn.textContent=canJoin?"▶ solicitar entrada":"🔒 bloqueado";
+      btn.disabled=!canJoin;
+      if(canJoin)btn.onclick=()=>joinGroup(g);
+      card.innerHTML=inner;card.appendChild(btn);
+    } else if(isMember){
+      card.innerHTML=inner;
+      const mwrap=document.createElement("div");mwrap.className="group-missions";
+      for(const m of g.missions){
+        const done=S.groups.completedGroupMissions.has(m.id);
+        const cd=!!S.cds["gm_"+m.id];
+        const mi=document.createElement("div");mi.className="group-mission"+(done||cd?" disabled":"");
+        mi.innerHTML=`<div class="btn-title">${done?"✓ ":""}${m.t}</div><div class="btn-sub">${m.s}</div>
+          <div class="btn-reward">${done?"concluída":"+R$"+m.m+" · +"+m.xp+"xp · rep +"+m.rep}</div>
+          ${cd?`<div class="btn-req">⏳ recarregando…</div>`:""}`;
+        if(!done&&!cd)mi.onclick=()=>doGroupMission(g.id,m);
+        mwrap.appendChild(mi);
+      }
+      card.appendChild(mwrap);
+    } else {
+      card.innerHTML=inner;
+    }
+    sec.appendChild(card);
+  }
+}
+
+// ---- MISSÃO: OPERAÇÃO BLACKOUT + FUGA ----
+// Ativada por email. Tem 2 fases:
+// FASE 1 — hackear o alvo grande (interativo)
+// FASE 2 — 30s depois a polícia chega: escolher FUGIR ou APAGAR RASTROS
+
+let _blackoutPhase = 0; // 0=não iniciada, 1=hack, 2=fuga/apagar
+
+function startBlackoutMission(){
+  if(S.doneMissions.has("blackout"))return;
+  _mission="blackout"; _step=0; _user=""; _hint=0; _blackoutPhase=1;
+  document.getElementById("mterm").innerHTML="";
+  document.getElementById("modal-title").textContent="OPERAÇÃO BLACKOUT";
+  document.getElementById("minput").value=""; document.getElementById("minput").type="text";
+  document.getElementById("minput-row").style.display="flex";
+  document.getElementById("modal-bg").classList.add("open");
+
+  mlog("// OPERAÇÃO BLACKOUT — ALVO: Banco Central BR","sys");
+  mlog("","");
+  mlog("Intel recebida: servidor de homologação do BACEN","warn");
+  mlog("exposto por erro de config. janela: ~4 minutos.","warn");
+  mlog("","");
+  mlog("PASSO 1/2 — Identifique o vetor de entrada:","");
+  mlog("  [1] SQL injection no portal de consultas","dim");
+  mlog("  [2] CVE-2021-44228 (Log4Shell) no serviço Java","dim");
+  mlog("  [3] Credencial vazada no GitHub do dev","dim");
+  mlog("","");
+  document.getElementById("mprompt").textContent="vetor (1-3): ";
+  document.getElementById("minput").focus();
+}
+
+function submitBlackout(){
+  const val=document.getElementById("minput").value.trim(); if(!val)return;
+
+  if(_blackoutPhase===1){
+    if(_step===0){
+      const VETORES={"1":"SQL Injection","2":"Log4Shell (CVE-2021-44228)","3":"Credencial vazada"};
+      if(!VETORES[val]){mlog("opção inválida.","err");document.getElementById("minput").value="";return;}
+      mlog("vetor: "+VETORES[val],"");
+      mlog("","");
+      mlog("PASSO 2/2 — Qual dado você vai extrair:","");
+      mlog("  [1] Transferências internas — últimas 24h","dim");
+      mlog("  [2] Chaves de API de bancos parceiros","dim");
+      mlog("  [3] Identidade de correntistas VIP","dim");
+      mlog("","");
+      document.getElementById("mprompt").textContent="alvo (1-3): ";
+      document.getElementById("minput").value=""; _step=1;
+    } else if(_step===1){
+      const ALVOS={"1":"transferências internas","2":"chaves de API","3":"identidade VIP"};
+      if(!ALVOS[val]){mlog("opção inválida.","err");document.getElementById("minput").value="";return;}
+      mlog("alvo: "+ALVOS[val],"");
+      document.getElementById("minput-row").style.display="none";
+      mlog("","");
+      setTimeout(()=>mlog("conectando ao servidor 200.152.38.4...","dim"),300);
+      setTimeout(()=>mlog("explorando vetor de entrada...","dim"),900);
+      setTimeout(()=>mlog("acesso root obtido.","ok"),1800);
+      setTimeout(()=>mlog("extraindo "+ALVOS[val]+"...","warn"),2500);
+      setTimeout(()=>mlog("3.2GB transferidos para VPS intermediário.","ok"),3500);
+      setTimeout(()=>{
+        mlog("","");
+        mlog(">>> ACESSO CONFIRMADO — DADOS OBTIDOS","ok");
+        mlog("+R$1.800 · +120xp · rep +20","ok");
+        // recompensar fase 1
+        S.money+=1800; gainXP(120); S.rep+=20; S.heat=Math.min(100,S.heat+35);
+        log("> OPERAÇÃO BLACKOUT — fase 1 concluída. R$1800","ok");
+        toast("💀 Banco Central hackeado!");
+        addFeedItem("não vou falar o que aconteceu hoje. mas foi grande. muito grande. 👁️");
+        gainFollowers(150);
+        updateUI();
+        // 8 segundos depois: polícia chega
+        setTimeout(()=>triggerBlackoutPhase2(), 8000);
+      },4200);
+    }
+  }
+}
+
+function triggerBlackoutPhase2(){
+  _blackoutPhase=2;
+  // fechar modal atual e reabrir com fase 2
+  document.getElementById("mterm").innerHTML="";
+  document.getElementById("modal-title").textContent="🚨 ALERTA — POLÍCIA NA ÁREA";
+
+  mlog("","");
+  mlog("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓","err");
+  mlog("  ALERTA DE INTRUSÃO DETECTADO  ","err");
+  mlog("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓","err");
+  mlog("","");
+  setTimeout(()=>{
+    mlog("CGCIBER rastreou sua conexão.","warn");
+    mlog("Equipe de resposta mobilizada.","warn");
+    mlog("Estimativa: 3 minutos até sua localização.","warn");
+    mlog("","");
+    mlog("Você tem UMA escolha:","");
+    mlog("","");
+  },600);
+  setTimeout(()=>{
+    mlog("  [1] FUGIR — desligar tudo e sumir agora","dim");
+    mlog("      (perde equipamentos, mantém liberdade)","dim");
+    mlog("","");
+    mlog("  [2] APAGAR RASTROS — ficar e limpar tudo","dim");
+    mlog("      (arriscado, mas salva equipamentos)","dim");
+    mlog("","");
+    document.getElementById("mprompt").textContent="decisão (1 ou 2): ";
+    document.getElementById("minput").value="";
+    document.getElementById("minput-row").style.display="flex";
+    document.getElementById("minput").focus();
+  },1400);
+
+  // countdown visual no terminal
+  let secs=90;
+  const countdown=setInterval(()=>{
+    if(_blackoutPhase!==2){clearInterval(countdown);return;}
+    secs--;
+    if(secs===60)mlog("⏱ 60 segundos restantes...","warn");
+    if(secs===30)mlog("⏱ 30 segundos! DECIDA AGORA!","err");
+    if(secs<=0){
+      clearInterval(countdown);
+      if(_blackoutPhase===2) forceCapture(); // não decidiu a tempo
+    }
+  },1000);
+}
+
+function submitBlackoutEscape(){
+  const val=document.getElementById("minput").value.trim();
+  if(val!=="1"&&val!=="2"){mlog("digite 1 ou 2.","err");document.getElementById("minput").value="";return;}
+  document.getElementById("minput-row").style.display="none";
+  _blackoutPhase=99; // resolvido
+
+  if(val==="1"){
+    // FUGIR
+    mlog("","");
+    mlog("decisão: FUGIR","warn");
+    setTimeout(()=>mlog("desligando todos os dispositivos...","dim"),300);
+    setTimeout(()=>mlog("destruindo sessão ativa...","dim"),800);
+    setTimeout(()=>mlog("saindo do apartamento...","warn"),1400);
+    setTimeout(()=>{
+      mlog("","");
+      mlog(">>> VOCÊ CONSEGUIU FUGIR","ok");
+      mlog("Policiais chegaram 4 minutos depois.","dim");
+      mlog("Encontraram apenas um HD formatado.","dim");
+      mlog("Caso encerrado por falta de provas.","ok");
+      mlog("","");
+      mlog("custo: -R$200 (equipamentos abandonados)","warn");
+      mlog("risco zerado · missão concluída","ok");
+      S.money=Math.max(0,S.money-200);
+      S.heat=Math.max(0,S.heat-40);
+      log("> BLACKOUT: fugiu. risco -40. -R$200 em equipamentos.","ok");
+      toast("🏃 Fugiu! Polícia não encontrou nada.");
+      finishBlackout();
+    },2200);
+  } else {
+    // APAGAR RASTROS
+    mlog("","");
+    mlog("decisão: APAGAR RASTROS","warn");
+    setTimeout(()=>mlog("rodando script de limpeza...","dim"),300);
+    setTimeout(()=>mlog("shred -vfz /dev/sda...","dim"),700);
+    setTimeout(()=>mlog("limpando logs do sistema...","dim"),1200);
+    setTimeout(()=>mlog("sobrescrevendo swap...","dim"),1700);
+    // resultado baseado na defesa do jogador
+    setTimeout(()=>{
+      const success=S.defense>=40||S.owned.has("proxychains");
+      if(success){
+        mlog("","");
+        mlog(">>> RASTROS APAGADOS COM SUCESSO","ok");
+        mlog("Policiais chegaram. Periciaram 6 horas.","dim");
+        mlog("Nada encontrado. Suspeito liberado.","ok");
+        mlog("","");
+        mlog("equipamentos preservados · risco -20","ok");
+        S.heat=Math.max(0,S.heat-20);
+        log("> BLACKOUT: apagou rastros. risco -20.","ok");
+        toast("🧹 Rastros apagados! Polícia não achou nada.");
+      } else {
+        mlog("","");
+        mlog(">>> LIMPEZA INCOMPLETA — DEFESA INSUFICIENTE","err");
+        mlog("Perícia encontrou fragmentos no disco.","err");
+        mlog("Investigação aberta. Risco +30.","err");
+        mlog("","");
+        mlog("DICA: ProxyChains ou defesa 40%+ garante limpeza.","warn");
+        S.heat=Math.min(100,S.heat+30);
+        log("> BLACKOUT: limpeza falhou. risco +30.","err");
+        toast("⚠️ Limpeza incompleta! Investigação aberta.");
+      }
+      finishBlackout();
+    },2400);
+  }
+}
+
+function forceCapture(){
+  _blackoutPhase=99;
+  document.getElementById("minput-row").style.display="none";
+  mlog("","");
+  mlog(">>> TEMPO ESGOTADO — VOCÊ NÃO DECIDIU","err");
+  mlog("Policiais chegaram. Equipamentos apreendidos.","err");
+  mlog("Risco máximo. Investigação em andamento.","err");
+  S.heat=100;
+  const lost=Math.round(S.money*0.3);
+  S.money=Math.max(0,S.money-lost);
+  log("> BLACKOUT: capturado por omissão. risco máximo.","err");
+  toast("🚔 Capturado! Agiu rápido demais.");
+  updateUI();
+  setTimeout(()=>{document.getElementById("modal-bg").classList.remove("open");_mission=null;},3000);
+}
+
+function finishBlackout(){
+  S.doneMissions.add("blackout");
+  updateUI();renderMissions();
+  setTimeout(()=>{document.getElementById("modal-bg").classList.remove("open");_mission=null;_blackoutPhase=0;},3500);
+}
+
+// FILA DE EMAILS — convite 0xVoid chega quando condições são atingidas
+function checkVoidInvite(){
+  if(S.groups.member==="vxvoid"||S._voidInviteSent)return;
+  if(S.level>=10&&S.rep>=80&&S.groups.member==="phantom"){
+    S._voidInviteSent=true;
+    addEmail({from:"0x000@void.onion",type:"mission",subject:"// você foi observado //",time:"agora",
+      preview:"não responda. apenas leia.",
+      body:"ghost_zero.\n\nNós te observamos há algum tempo.\n\nVocê passou nos nossos critérios.\n\nNão vamos explicar quem somos.\nVocê já sabe.\n\nAcesse a seção de grupos.\nA porta está aberta.\n\nNão compartilhe este e-mail.\n\n— 0x"});
+    toast("📧 mensagem estranha recebida...");
+  }
+}
+
+// checar convite do void — movido para initGame
+const EMAIL_QUEUE=[
+  {delay:3000,email:{from:"sistema@hackerlife.net",type:"info",subject:"Bem-vindo ao submundo",time:"agora",preview:"Você acaba de entrar no jogo...",body:"ghost_zero,\n\nBem-vindo ao submundo digital.\n\nComece pequeno. Não chame atenção.\n\nE uma coisa: NUNCA clique em links de desconhecidos.\n\n— admin"}},
+  {delay:10000,email:{from:"Kr4ck3r_BR@protonmail.com",type:"mission",subject:"primeira missão — servidor fácil",time:"há pouco",preview:"Achei um servidor sem proteção...",body:"ghost_zero,\n\nAchei um servidor de um cara sem noção de segurança.\n\nSSH aberto, sem fail2ban, sem nada.\n\nIP: 192.168.1.47\n\nTenta o óbvio primeiro.\n\n— Kr4ck3r_BR",missionReward:null}},
+  {delay:20000,sms:{from:"Kr4ck3r_BR",text:"ei, viu o email? o servidor tá fácil demais. vai lá antes que alguém feche.",isMe:false}},
+  {delay:40000,email:{from:"suporte@mercadollivre-seguranca.com",type:"phishing",subject:"[URGENTE] Sua conta foi suspensa",time:"há pouco",preview:"Clique para verificar sua conta...",phishLoss:80,body:"Prezado usuário,\n\nIdentificamos atividade suspeita na sua conta.\n\nPara evitar bloqueio permanente, acesse:\n>> http://mercadollivre-seguranca.com/verify <<\n\nEquipe de Segurança\nMercado Livre S.A."}},
+  {delay:60000,sms:{from:"Kr4ck3r_BR",text:"cuidado com emails de 'suporte'. tão te pescando. compra um scanner logo.",isMe:false}},
+  {delay:90000,email:{from:"x0phantom@protonmail.com",type:"mission",subject:"Job: dump de banco de dados — R$500",time:"há pouco",preview:"Pago na hora, sem conversa...",body:"ghost_zero,\n\nPreciso de um dump do banco de dados de um e-commerce.\n\nPagamento: R$500 em cripto.\n\n— x0phantom",missionReward:{money:500,xp:80,rep:8,heat:18}}},
+  {delay:130000,email:{from:"noreply@bradesco-digital.net",type:"phishing",subject:"PIX pendente de R$1.200 — confirme",time:"agora",preview:"Uma transferência aguarda confirmação...",phishLoss:150,body:"Bradesco Internet Banking\n\nTransferência PIX de R$1.200,00 aguardando confirmação.\n\nAcesse:\n>> http://bradesco-digital.net/pix/confirmar <<\n\nLink expira em 15 minutos.\n\nBradesco S.A."}},
+  {delay:200000,sms:{from:"Kr4ck3r_BR",text:"ghost_zero. tô te mandando uma coisa. não pergunta de onde veio. só lê.",isMe:false}},
+  {delay:203000,email:{from:"intel@phantom-syndicate.onion",type:"mission",
+   subject:"INTEL QUENTE — janela de 4min no BACEN",time:"agora",
+   preview:"servidor de homologação exposto por erro...",
+   body:"ghost_zero,\n\nChegou uma intel de dentro.\n\nServidor de homologação do Banco Central foi exposto por erro de configuração de um dev júnior. Janela estimada: 4 minutos antes do patch automático.\n\nDados disponíveis: transferências internas, chaves de API de parceiros, identidade de correntistas VIP.\n\nRisco alto. Recompensa proporcional.\n\nSe for entrar, entre agora. A missão está disponível.\n\n— intel",
+   missionReward:null}},
+  {delay:160000,sms:{from:"d3l3g4cia_sc",text:"ghost_zero. soubemos do seu trabalho. temos um suspeito que some toda vez. se topar montar uma armadilha digital, a gente cobre os custos. interesse?",isMe:false}},
+  {delay:165000,email:{from:"operacoes@delegacia-sc.gov.br",type:"mission",subject:"Proposta oficial — armadilha digital",time:"agora",preview:"Colaboração com a polícia...",
+   body:"ghost_zero,\n\nTemos um suspeito que usa a internet para atividades criminosas e some sempre que chegamos perto.\n\nPrecisamos de alguém com suas habilidades para montar uma armadilha digital.\n\nNão há pagamento em dinheiro — mas garantimos imunidade.\n\nSe topar, acesse as Missões Especiais.\n\n— Delegado Carvalho",
+   missionReward:null}},
+];
+EMAIL_QUEUE.forEach(item=>setTimeout(()=>{if(item.email)addEmail(item.email);if(item.sms)addSMS(item.sms);},item.delay));
+
+// contra-hack passivo — movido para initGame
+
+// ---- INTRO ----
+const INTRO_LINES=[
+  {t:"",c:"d",d:0},
+  {t:"HACKERLIFE // log do sistema",c:"d",d:300},
+  {t:"",c:"",d:700},
+  {t:"iniciando registro de incidente #4471...",c:"d",d:1000},
+  {t:"",c:"",d:1600},
+  {t:"DATA: 14/03/2024  |  21:47:03",c:"d",d:1800},
+  {t:"USUÁRIO: lucas.mendes@technova.com.br",c:"b",d:2400},
+  {t:"CARGO: Sysadmin Sênior — TechNova S.A.",c:"b",d:3000},
+  {t:"",c:"",d:3600},
+  {t:"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",c:"d",d:3800},
+  {t:"",c:"",d:4200},
+  {t:"Você estava quase lá.",c:"",d:4400},
+  {t:"Três anos na TechNova. Quase promovido a Tech Lead.",c:"",d:5200},
+  {t:"Reconhecido. Respeitado. Com futuro.",c:"g",d:6200},
+  {t:"",c:"",d:7000},
+  {t:"Então aconteceu.",c:"y",d:7400},
+  {t:"",c:"",d:8000},
+  {t:"16/03/2024 — 02:13:47",c:"d",d:8200},
+  {t:"[ALERTA] acesso não autorizado detectado",c:"r",d:8800},
+  {t:"[ALERTA] arquivos confidenciais do cliente Vortex Corp exfiltrados",c:"r",d:9600},
+  {t:"[ALERTA] origem do acesso: workstation LM-047 — lucas.mendes",c:"r",d:10600},
+  {t:"",c:"",d:11400},
+  {t:"Mas não foi você.",c:"y",d:11800},
+  {t:"",c:"",d:12400},
+  {t:"Rodrigo Menezes. Colega de equipe.",c:"",d:12700},
+  {t:"Você vinha se destacando. Ele não aceitou.",c:"",d:13500},
+  {t:"Enquanto você dormia, ele usou suas credenciais,",c:"",d:14400},
+  {t:"roubou 47GB de dados da Vortex Corp",c:"r",d:15300},
+  {t:"e plantou os logs no seu computador.",c:"r",d:16000},
+  {t:"",c:"",d:16800},
+  {t:"16/03/2024 — 09:00:00",c:"d",d:17200},
+  {t:"Você chegou no trabalho normalmente.",c:"",d:17700},
+  {t:"Segurança te esperava na entrada.",c:"y",d:18400},
+  {t:"",c:"",d:19000},
+  {t:"Demitido. Sem direito de defesa.",c:"r",d:19300},
+  {t:"Equipamentos apreendidos.",c:"r",d:20000},
+  {t:"Nome destruído no mercado.",c:"r",d:20600},
+  {t:"",c:"",d:21200},
+  {t:"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",c:"d",d:21600},
+  {t:"",c:"",d:22000},
+  {t:"Três meses depois. Quarto alugado. R$380 na conta.",c:"d",d:22400},
+  {t:"",c:"",d:23000},
+  {t:"Uma mensagem chegou.",c:"",d:23400},
+  {t:"",c:"",d:24000},
+  {t:"Kr4ck3r_BR: \"ei. sei o que aconteceu com você.\"",c:"g",d:24400},
+  {t:"Kr4ck3r_BR: \"sei quem foi. e sei como provar.\"",c:"g",d:25300},
+  {t:"Kr4ck3r_BR: \"mas vai precisar aprender a jogar o jogo deles.\"",c:"g",d:26300},
+  {t:"Kr4ck3r_BR: \"tá dentro?\"",c:"g",d:27200},
+  {t:"",c:"",d:27900},
+  {t:"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",c:"d",d:28300},
+  {t:"",c:"",d:28700},
+  {t:"Objetivo final: hackear a TechNova.",c:"p",d:29100},
+  {t:"Encontrar os logs reais. Vazar as provas.",c:"p",d:29900},
+  {t:"Destruir a reputação de r0drig0.",c:"p",d:30700},
+  {t:"Provar sua inocência.",c:"g",d:31500},
+  {t:"",c:"",d:32200},
+  {t:"O nome ghost_zero começa agora.",c:"y",d:32700},
+  {t:"",c:"",d:33400},
+];
+
+function runIntro(){
+  const term=document.getElementById("intro-term");
+  let cursor=document.createElement("span");cursor.className="cursor";
+  INTRO_LINES.forEach(({t,c,d},i)=>{
+    setTimeout(()=>{
+      if(cursor.parentNode)cursor.parentNode.removeChild(cursor);
+      const el=document.createElement("span");
+      el.className="il"+(c?" "+c:"");
+      el.textContent=t;
+      term.appendChild(el);
+      term.appendChild(cursor);
+      term.scrollTop=term.scrollHeight;
+      // mostrar botão continuar na última linha
+      if(i===INTRO_LINES.length-1){
+        setTimeout(()=>{
+          if(cursor.parentNode)cursor.parentNode.removeChild(cursor);
+          document.getElementById("intro-continue").style.display="block";
+        },800);
+      }
+    },d);
+  });
+}
+
+// ---- OPERAÇÃO VERDADE — MISSÃO FINAL ----
+let _tvStep=0;
+
+function startTechNovaMission(){
+  if(S.doneMissions.has("vx_technova"))return;
+  _mission="vx_technova"; _tvStep=0;
+  document.getElementById("mterm").innerHTML="";
+  document.getElementById("modal-title").textContent="⚠ OPERAÇÃO VERDADE — TechNova S.A.";
+  document.getElementById("minput").value=""; document.getElementById("minput").type="text";
+  document.getElementById("minput-row").style.display="flex";
+  document.getElementById("modal-bg").classList.add("open");
+  const iml=(m,c,d)=>setTimeout(()=>mlog(m,c),d);
+
+  iml("// OPERAÇÃO VERDADE — 0xVoid + ghost_zero","sys",0);
+  iml("alvo: technova-infra.com.br","warn",600);
+  iml("objetivo: recuperar logs de acesso — março/2024","warn",1200);
+  iml("","",1800);
+  iml("ATO 1 — ENTRADA NO SERVIDOR DA TECHNOVA","p",2000);
+  iml("","",2500);
+  iml("varredura de superfície de ataque...","dim",2700);
+  iml("porta 443 aberta — painel admin Laravel","dim",3200);
+  iml("versão: Laravel 9.1.0 — CVE-2021-3129 disponível","ok",3800);
+  iml("","",4300);
+  iml("como você quer entrar?","",4500);
+  iml("  [1] explorar CVE-2021-3129 (Laravel RCE)","dim",4900);
+  iml("  [2] SQL injection no login do painel","dim",5300);
+  iml("  [3] credencial de ex-funcionário (você mesmo)","dim",5700);
+  iml("","",6100);
+  setTimeout(()=>{
+    document.getElementById("mprompt").textContent="entrada (1-3): ";
+    document.getElementById("minput").focus();
+    _tvStep=1;
+  },6300);
+}
+
+function submitTechNova(){
+  const val=document.getElementById("minput").value.trim();
+  document.getElementById("minput").value="";
+
+  if(_tvStep===1){
+    const ENTRADAS={"1":"CVE-2021-3129 (Laravel RCE)","2":"SQL Injection","3":"credencial própria"};
+    if(!ENTRADAS[val]){mlog("opção inválida.","err");return;}
+    mlog("entrada: "+ENTRADAS[val],"");
+    document.getElementById("minput-row").style.display="none";
+    const iml=(m,c,d)=>setTimeout(()=>mlog(m,c),d);
+    iml("","",300);
+    iml("explorando vetor...","dim",500);
+    if(val==="3"){
+      iml("credencial lucas.mendes ainda ativa no sistema.","warn",1200);
+      iml("eles nunca revogaram o acesso. descuido deles.","ok",1800);
+    } else {
+      iml("payload enviado...","dim",1000);
+      iml("resposta do servidor: 500 Internal Server Error","warn",1600);
+      iml("shell reversa estabelecida.","ok",2200);
+    }
+    iml("acesso obtido — nível: administrador","ok",2800);
+    iml("","",3400);
+    iml("ATO 2 — DENTRO DO SERVIDOR","p",3600);
+    iml("","",4000);
+    iml("$ ls /var/log/technova/","sys",4200);
+    iml("access_2024-03/  incidents/  audit/  rodrigo_backup/","",4700);
+    iml("","",5100);
+    iml("rodrigo_backup/ — pasta não deveria existir aqui.","warn",5300);
+    iml("$ ls rodrigo_backup/","sys",5800);
+    iml("pagamento_confirmado.pdf  instrucoes.txt  logs_plantados/","err",6300);
+    iml("","",6800);
+    iml("$ cat instrucoes.txt","sys",7000);
+    iml("De: diretoria@technova.com.br","err",7500);
+    iml("Para: rodrigo.menezes@technova.com.br","err",7900);
+    iml("","",8200);
+    iml("\"Rodrigo, conforme combinado. Use as credenciais","err",8400);
+    iml("do Lucas para acessar o servidor da Vortex Corp.","err",8900);
+    iml("Plante os logs no workstation dele. LM-047.","err",9400);
+    iml("Pagamento na conta offshore assim que confirmado.\"","err",9900);
+    iml("","",10500);
+    iml("$ cat pagamento_confirmado.pdf | strings | grep valor","sys",10800);
+    iml("VALOR TRANSFERIDO: R$ 80.000,00","err",11400);
+    iml("BENEFICIÁRIO: R. MENEZES — conta: ****3847","err",11900);
+    iml("DATA: 17/03/2024 — um dia depois da sua demissão.","err",12400);
+    iml("","",13000);
+    iml(">>> PROVAS ENCONTRADAS <<<","ok",13300);
+    iml("","",13700);
+    iml("ATO 3 — A DECISÃO","p",14000);
+    iml("","",14500);
+    iml("você tem os arquivos. agora o que faz?","warn",14800);
+    iml("","",15300);
+    iml("  [1] VAZAR TUDO — publicar no jornalismo investigativo","dim",15500);
+    iml("      e nas redes. TechNova cai. r0drig0 é preso.","dim",15900);
+    iml("      você fica famoso. mas o risco vai a 100%.","dim",16300);
+    iml("","",16700);
+    iml("  [2] ENTREGAR AO AGENTE SALLES — acordo formal.","dim",16900);
+    iml("      imunidade total. r0drig0 e diretoria presos.","dim",17300);
+    iml("      você sai limpo — mas em silêncio.","dim",17700);
+    iml("","",18100);
+    iml("  [3] GUARDAR AS PROVAS — usar como alavanca.","dim",18300);
+    iml("      chantagem corporativa. alto risco. alta recompensa.","dim",18700);
+    iml("","",19100);
+    setTimeout(()=>{
+      document.getElementById("mprompt").textContent="decisão (1-3): ";
+      document.getElementById("minput").value="";
+      document.getElementById("minput-row").style.display="flex";
+      document.getElementById("minput").focus();
+      _tvStep=2;
+    },19500);
+
+  } else if(_tvStep===2){
+    if(!["1","2","3"].includes(val)){mlog("opção inválida.","err");return;}
+    document.getElementById("minput-row").style.display="none";
+    _tvStep=3;
+    const iml=(m,c,d)=>setTimeout(()=>mlog(m,c),d);
+
+    if(val==="1"){
+      // FINAL 1 — Vazar tudo
+      iml("decisão: VAZAR TUDO","warn",200);
+      iml("","",700);
+      iml("enviando arquivos para The Intercept Brasil...","dim",900);
+      iml("enviando para perfil @ghost_zero no x_hacker...","dim",1500);
+      iml("enviando para CERT.br e Ministério Público...","dim",2100);
+      iml("","",2700);
+      iml(">>> PUBLICADO <<<","ok",3000);
+      iml("","",3400);
+      iml("manchete: \"TechNova pagou hacker para destruir","ok",3700);
+      iml("funcionário que descobriu esquema de lavagem\"","ok",4100);
+      iml("","",4500);
+      iml("Rodrigo Menezes preso — 22:47","ok",5000);
+      iml("CEO da TechNova renuncia — 23:15","ok",5500);
+      iml("Vortex Corp sob investigação do COAF — 00:03","ok",6000);
+      iml("","",6500);
+      iml("lucas mendes inocentado publicamente.","ok",7000);
+      iml("","",7500);
+      iml("mas o agente Salles abriu inquérito contra você.","err",8000);
+      iml("risco: 100%. você é livre e culpado ao mesmo tempo.","warn",8600);
+      iml("","",9200);
+      iml("// FIM — FINAL: HERÓI ANÔNIMO //","p",9500);
+      setTimeout(()=>endGame(1),10000);
+
+    } else if(val==="2"){
+      // FINAL 2 — Acordo com Salles
+      iml("decisão: ENTREGAR AO AGENTE SALLES","warn",200);
+      iml("","",700);
+      iml("ligando para v.salles@cgciber.gov.br...","dim",900);
+      iml("","",1500);
+      iml("Salles: \"sabia que você ia chegar aqui.\"","b",1800);
+      iml("Salles: \"manda os arquivos. o acordo está de pé.\"","b",2400);
+      iml("","",3000);
+      iml("arquivos transferidos via canal criptografado...","dim",3300);
+      iml("","",3900);
+      iml("48h depois —","dim",4200);
+      iml("","",4600);
+      iml("Rodrigo Menezes — preso preventivamente.","ok",4900);
+      iml("Diretoria TechNova — 4 executivos indiciados.","ok",5400);
+      iml("Vortex Corp — operação especial da PF deflagrada.","ok",5900);
+      iml("","",6500);
+      iml("Salles: \"seu nome foi retirado de todos os inquéritos.","b",6800);
+      iml("Salles: \"oficialmente, você nunca existiu.\"","b",7400);
+      iml("","",8000);
+      iml("risco zerado. ficha limpa. liberdade total.","ok",8400);
+      iml("","",8900);
+      iml("// FIM — FINAL: ACORDO //","p",9200);
+      setTimeout(()=>endGame(2),9800);
+
+    } else {
+      // FINAL 3 — Chantagem
+      iml("decisão: GUARDAR E USAR COMO ALAVANCA","warn",200);
+      iml("","",700);
+      iml("enviando e-mail criptografado para a diretoria...","dim",900);
+      iml("","",1500);
+      iml("'vocês sabem o que eu tenho.'","err",1800);
+      iml("'R$500.000 em cripto. ou isso vai a público.'","err",2400);
+      iml("","",3000);
+      iml("resposta: transferência recebida — R$500.000","ok",3600);
+      iml("","",4200);
+      iml("mas r0drig0 continua solto.","warn",4600);
+      iml("e a TechNova continua operando.","warn",5100);
+      iml("e o agente Salles ainda está atrás de você.","err",5700);
+      iml("","",6300);
+      iml("você ganhou. mas não venceu.","warn",6700);
+      iml("","",7200);
+      iml("// FIM — FINAL: CHANTAGEM //","p",7500);
+      setTimeout(()=>endGame(3),8200);
+    }
+  }
+}
+
+function endGame(finalNum){
+  const FINAIS={
+    1:{title:"HERÓI ANÔNIMO",sub:"a verdade veio à tona. o preço foi alto.",color:"#a371f7",bonus:{xp:500,rep:100,money:0}},
+    2:{title:"ACORDO",sub:"inocência provada. identidade apagada.",color:"#3fb950",bonus:{xp:300,rep:50,money:0}},
+    3:{title:"CHANTAGEM",sub:"rico. livre. mas sozinho.",color:"#e3b341",bonus:{xp:200,rep:20,money:500000}},
+  };
+  const f=FINAIS[finalNum];
+  gainXP(f.bonus.xp); S.rep+=f.bonus.rep; S.money+=f.bonus.money;
+  S.doneMissions.add("vx_technova");
+  S.heat = finalNum===2 ? 0 : finalNum===1 ? 100 : S.heat;
+  setTimeout(()=>{
+    document.getElementById("modal-bg").classList.remove("open");
+    _mission=null;
+    // mostrar tela de fim
+    showEndScreen(f);
+    updateUI();
+  },500);
+}
+
+function showEndScreen(f){
+  const overlay=document.createElement("div");
+  overlay.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;font-family:monospace";
+  overlay.innerHTML=`
+    <div style="font-size:11px;color:#484f58;letter-spacing:0.15em;margin-bottom:16px">HACKERLIFE RPG — FIM DE JOGO</div>
+    <div style="font-size:28px;font-weight:700;color:${f.color};margin-bottom:12px">${f.title}</div>
+    <div style="font-size:13px;color:#c9d1d9;margin-bottom:32px">${f.sub}</div>
+    <div style="font-size:11px;color:#484f58;margin-bottom:8px">ghost_zero</div>
+    <div style="font-size:11px;color:#484f58;margin-bottom:40px">lucas mendes — inocentado.</div>
+    <button onclick="location.reload()" style="background:#238636;border:none;border-radius:8px;color:#fff;font-family:monospace;font-size:13px;font-weight:700;padding:12px 28px;cursor:pointer">↩ jogar novamente</button>
+  `;
+  document.body.appendChild(overlay);
+}
+// Investigador da CGCIBER que foi designado ao caso ghost_zero.
+// Aparece progressivamente conforme heat e rep sobem.
+// 4 níveis de escalada: observando → investigando → mandado → fechando cerco
+
+const AGENT_NEWS=[
+  // nível 1 — menção discreta
+  {lvl:1, src:"Blog Segurança Digital",
+   h:"CGCIBER monitora aumento de ataques a redes residenciais no Sul do país",
+   t:"há 3 dias"},
+  // nível 2 — investigação aberta
+  {lvl:2, src:"G1 Tecnologia",
+   h:"Polícia Federal abre inquérito para identificar hacker responsável por série de ataques",
+   t:"ontem"},
+  {lvl:2, src:"Folha Tech",
+   h:"Agente da CGCIBER afirma: 'temos um perfil do suspeito, é questão de tempo'",
+   t:"hoje"},
+  // nível 3 — mandado
+  {lvl:3, src:"UOL Notícias",
+   h:"Mandado de busca expedido contra suspeito de hackear sistema financeiro nacional",
+   t:"hoje"},
+  {lvl:3, src:"CNN Brasil",
+   h:"CGCIBER identifica padrão de ataques — investigação aponta para único operador",
+   t:"hoje"},
+  // nível 4 — cerco fechando
+  {lvl:4, src:"Reuters BR",
+   h:"PF realiza operação em São Paulo buscando hacker ligado a vazamento do Banco Central",
+   t:"agora"},
+  {lvl:4, src:"Band News",
+   h:"Operação Fantasma: agente federal diz estar 'a horas de localizar o suspeito'",
+   t:"agora"},
+];
+
+// emails e SMS do agente conforme escalada
+const AGENT_MESSAGES={
+  1:{
+    sms:{from:"número desconhecido",
+      text:"olá lucas. só queria avisar que estamos cientes das suas atividades recentes. — VS",
+      isMe:false},
+  },
+  2:{
+    email:{from:"v.salles@cgciber.gov.br",type:"info",
+      subject:"Notificação formal — Ag. Vitor Salles / CGCIBER",time:"agora",
+      preview:"Você está sob investigação...",
+      body:"Sr. Lucas Mendes,\n\nSou o Agente Vitor Salles da CGCIBER — Centro de Gestão e Resposta a Incidentes Cibernéticos.\n\nEstamos conduzindo uma investigação sobre ataques cibernéticos recentes que apresentam padrão compatível com suas atividades.\n\nEste é um aviso formal. Você pode encerrar voluntariamente suas atividades agora ou aguardar o processo judicial.\n\nA escolha é sua.\n\n— Ag. Vitor Salles\nCGCIBER / PF"}
+  },
+  3:{
+    sms:{from:"Ag. Salles",
+      text:"mandado de busca e apreensão expedido. endereço está sendo verificado. última chance de cooperar.",
+      isMe:false},
+    email:{from:"v.salles@cgciber.gov.br",type:"info",
+      subject:"URGENTE — mandado expedido",time:"agora",
+      preview:"Mandado de busca e apreensão...",
+      body:"Lucas,\n\nO mandado foi expedido pelo juiz da 2ª Vara Federal.\n\nSabemos que você foi injustiçado na TechNova. Temos acesso aos mesmos registros que você busca.\n\nSe cooperar e nos ajudar a fechar o caso de Rodrigo Menezes, podemos garantir imunidade total.\n\nPense bem.\n\n— Salles\n\nPS: você tem 48h."}
+  },
+  4:{
+    sms:{from:"Ag. Salles",
+      text:"estamos do lado de fora. você tem 10 minutos para abrir a porta ou a equipe entra.",
+      isMe:false},
+  }
+};
+
+function getAgentLevel(){
+  if(S.rep>=60&&S.heat>=70) return 4;
+  if(S.rep>=35&&S.heat>=50) return 3;
+  if(S.rep>=15&&S.heat>=30) return 2;
+  if(S.rep>=8||S.heat>=20)  return 1;
+  return 0;
+}
+
+function updateAgentNews(){
+  // injeta notícias do agente no feed de notícias conforme nível
+  const lvl=getAgentLevel();
+  if(lvl===S.agent.level)return;
+  S.agent.level=lvl;
+
+  // adicionar notícias do agente ao NEWS_ITEMS
+  AGENT_NEWS.filter(n=>n.lvl===lvl).forEach(n=>{
+    if(!NEWS_ITEMS.find(x=>x.h===n.h))
+      NEWS_ITEMS.unshift({...n,gcls:"tag-elite",grp:"CGCIBER",style:"background:#1a0505;color:#f85149"});
+  });
+
+  // disparar mensagem do agente
+  const msg=AGENT_MESSAGES[lvl];
+  if(msg&&!S.agent["sent_"+lvl]){
+    S.agent["sent_"+lvl]=true;
+    if(msg.sms)  setTimeout(()=>{addSMS(msg.sms);agentLog(lvl);},2000);
+    if(msg.email)setTimeout(()=>addEmail(msg.email),msg.sms?5000:2000);
+  }
+}
+
+function agentLog(lvl){
+  const msgs={
+    1:"> [CGCIBER] alguém está de olho nas suas atividades...",
+    2:"> [CGCIBER] investigação formal aberta. Ag. Vitor Salles designado.",
+    3:"> [CGCIBER] MANDADO EXPEDIDO. cooperação pode ser sua saída.",
+    4:"> [CGCIBER] OPERAÇÃO EM ANDAMENTO. cerco fechando.",
+  };
+  if(msgs[lvl])log(msgs[lvl],"err");
+  if(lvl>=2)showAlert("🕵️ AGENTE VITOR SALLES","Investigador da CGCIBER está te rastreando. Nível "+lvl+"/4.");
+  if(lvl===3){
+    // no nível 3, Salles oferece o acordo — narrativa importante
+    toast("🤝 Salles oferece um acordo... verifique o e-mail.");
+  }
+  if(lvl===4){
+    toast("🚨 CERCO FECHANDO — reduza o risco agora!");
+    // risco dispara
+    S.heat=Math.min(100,S.heat+25);
+    updateUI();
+  }
+}
+
+// checar agente a cada hack e periodicamente
+function checkAgent(){updateAgentNews();}
+
+function startGame(){
+  document.getElementById("intro").style.display="none";
+  document.getElementById("app").style.display="flex";
+  initGame();
+}
+
+function initGame(){
+  updateUI();
+  renderPhone();
+  setupSocialButtons();
+  log("> ghost_zero online. hora de começar.","ok");
+  log("> Kr4ck3r_BR está esperando sua resposta.","warn");
+  log("> DICA: compre Firewall antes de hackear muito.","dim");
+  // contra-hack passivo
+  setInterval(()=>{
+    if(S.heat>60&&S.defense<30&&S.money>30&&!_invasionActive){
+      const roll=Math.random();
+      if(roll<0.04) triggerInvasion();
+      else if(roll<0.09) triggerCounterHack();
+    }
+  },9000);
+  setInterval(checkVoidInvite,10000);
+  setInterval(checkAgent,15000);
+}
+
+// INIT
+runIntro();
+</script>
+</body>
+</html>
