@@ -229,7 +229,7 @@ h1 span{color:#484f58;font-size:11px;font-weight:400;display:block;margin-top:2p
       <span style="font-size:13px;font-weight:700;color:#e6edf3">ghost_zero</span>
       <span class="rank-badge" style="margin-left:7px" id="rank-badge">Script Kiddie</span>
     </div>
-    <div style="font-size:10px;color:#484f58">nível <span id="level" style="color:#e6edf3;font-weight:700">1</span></div>
+    <div style="font-size:10px;color:#484f58">nível <span id="level" style="color:#e6edf3;font-weight:700">1</span> · <span onclick="resetGame()" style="color:#30363d;cursor:pointer;font-size:9px">reset</span></div>
   </div>
   <div class="stats-grid">
     <div class="stat"><div class="stat-val money" id="money">R$0</div><div class="stat-label">💰 grana</div></div>
@@ -395,7 +395,71 @@ const S={money:0,xp:0,level:1,rep:0,heat:0,power:1,defense:0,xpNeeded:100,
   social:{followers:0,donations:0,posts:0,lastHack:null,feedItems:[]},
   groups:{member:null,completedGroupMissions:new Set()},
   agent:{level:0,alerted:false,warrantIssued:false,closingIn:false},
-  hackCycles:{}}; // conta quantos resets cada hack já teve
+  hackCycles:{}};
+
+// ---- SAVE / LOAD ----
+const SAVE_KEY="hackerlife_save";
+
+function saveGame(){
+  try{
+    const data={
+      money:S.money, xp:S.xp, level:S.level, rep:S.rep, heat:S.heat,
+      power:S.power, defense:S.defense, xpNeeded:S.xpNeeded,
+      owned:Array.from(S.owned),
+      uses:S.uses, hackCycles:S.hackCycles,
+      doneMissions:Array.from(S.doneMissions),
+      blog:{...S.blog},
+      courses:{...S.courses},
+      social:{...S.social, feedItems:S.social.feedItems.slice(0,10)},
+      groups:{member:S.groups.member, completedGroupMissions:Array.from(S.groups.completedGroupMissions)},
+      agent:{...S.agent},
+      _totalEarned:S._totalEarned||0,
+      _totalDelivery:S._totalDelivery||0,
+      _firstHackDone:S._firstHackDone||false,
+      _firstEmailOpened:S._firstEmailOpened||false,
+      _freelanceDone:S._freelanceDone||false,
+      _backdoor:S._backdoor||false,
+      _lastHackId:S._lastHackId||null,
+      _sameHackStreak:S._sameHackStreak||1,
+      savedAt:Date.now()
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  } catch(e){ console.warn("save falhou",e); }
+}
+
+function loadGame(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    if(!raw)return false;
+    const d=JSON.parse(raw);
+    S.money=d.money||0; S.xp=d.xp||0; S.level=d.level||1;
+    S.rep=d.rep||0; S.heat=d.heat||0; S.power=d.power||1;
+    S.defense=d.defense||0; S.xpNeeded=d.xpNeeded||100;
+    S.owned=new Set(d.owned||[]);
+    S.uses=d.uses||{}; S.hackCycles=d.hackCycles||{};
+    S.doneMissions=new Set(d.doneMissions||[]);
+    S.blog={...S.blog,...(d.blog||{})};
+    S.courses=d.courses||{};
+    S.social={...S.social,...(d.social||{})};
+    S.groups={member:d.groups?.member||null, completedGroupMissions:new Set(d.groups?.completedGroupMissions||[])};
+    S.agent={...S.agent,...(d.agent||{})};
+    S._totalEarned=d._totalEarned||0;
+    S._totalDelivery=d._totalDelivery||0;
+    S._firstHackDone=d._firstHackDone||false;
+    S._firstEmailOpened=d._firstEmailOpened||false;
+    S._freelanceDone=d._freelanceDone||false;
+    S._backdoor=d._backdoor||false;
+    S._lastHackId=d._lastHackId||null;
+    S._sameHackStreak=d._sameHackStreak||1;
+    return true;
+  } catch(e){ console.warn("load falhou",e); return false; }
+}
+
+function resetGame(){
+  if(!confirm("Tem certeza? Todo o progresso será perdido."))return;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
+}
 
 const RANKS=[{min:1,n:"Script Kiddie"},{min:3,n:"Cracker Novato"},{min:5,n:"Black Hat"},{min:8,n:"Elite Hacker"},{min:12,n:"Cyber God"}];
 const inbox=[], smsBox=[];
@@ -625,10 +689,14 @@ function acceptMissionEmail(id){
 
 // HACKS
 const HACKS=[
-  {id:"wifi",t:"Quebrar Wi-Fi vizinho",s:"brute force básico",m:15,xp:10,rep:1,heat:5,cd:3000,max:5,reset:60000},
-  {id:"phish",t:"Phishing simples",s:"e-mail falso de banco",m:40,xp:20,rep:2,heat:8,cd:5000,max:4,reset:90000},
-  {id:"scrape",t:"Vazar dados",s:"scraping + dark web",m:90,xp:35,rep:4,heat:12,cd:7000,max:3,reset:120000,lvl:2,pwr:2},
-  {id:"ransom",t:"Ransomware local",s:"empresa pequena",m:220,xp:60,rep:8,heat:20,cd:10000,max:2,reset:180000,lvl:4,pwr:3},
+  {id:"wifi",    t:"Quebrar Wi-Fi vizinho",    s:"brute force básico",           m:15, xp:10,rep:1,heat:5, cd:3000, max:5,reset:60000},
+  {id:"phish",   t:"Phishing simples",         s:"e-mail falso de banco",         m:40, xp:20,rep:2,heat:8, cd:5000, max:4,reset:90000},
+  {id:"scrape",  t:"Vazar dados",              s:"scraping + dark web",           m:90, xp:35,rep:4,heat:12,cd:7000, max:3,reset:120000,lvl:2,pwr:2},
+  {id:"ransom",  t:"Ransomware local",         s:"empresa pequena",               m:220,xp:60,rep:8,heat:20,cd:10000,max:2,reset:180000,lvl:4,pwr:3},
+  // desbloqueados por upgrades
+  {id:"cameras", t:"Invadir câmeras de segurança", s:"acesso remoto a câmeras IP mal configuradas", m:110,xp:40,rep:5,heat:14,cd:8000,max:3,reset:120000,lvl:2,reqItem:"ram",  itemLabel:"RAM 16GB"},
+  {id:"cryptojack",t:"Cryptojacking",          s:"minerar crypto na máquina alheia",               m:160,xp:55,rep:6,heat:16,cd:9000,max:3,reset:150000,lvl:3,reqItem:"gpu",  itemLabel:"GPU usada"},
+  {id:"wifi_pro",t:"Interceptar tráfego de rede",s:"sniffing avançado com antena potente",         m:85, xp:30,rep:3,heat:10,cd:6000,max:4,reset:90000, lvl:1,reqItem:"antena",itemLabel:"Antena Wi-Fi"},
 ];
 
 // retorna o multiplicador de degradação baseado em ciclos repetidos (entre resets)
@@ -672,7 +740,7 @@ function hackDegLabel(cycles, usesDone, streak){
 function renderHacks(){
   const c=document.getElementById("hack-actions");c.innerHTML="";
   for(const a of HACKS){
-    const u=getUses(a.id,a.max),locked=(a.lvl&&S.level<a.lvl)||(a.pwr&&S.power<a.pwr),cd=!!S.cds[a.id]||!!S.cds["__hackbusy"],esg=u<=0;
+    const u=getUses(a.id,a.max),locked=(a.lvl&&S.level<a.lvl)||(a.pwr&&S.power<a.pwr)||(a.reqItem&&!S.owned.has(a.reqItem)),cd=!!S.cds[a.id]||!!S.cds["__hackbusy"],esg=u<=0;
     const {cycles,earningMult}=hackDegradation(a.id);
     const usesDone=a.max-(u);
     const inCycleMult=inCycleEarnMult(a.id,a.max);
@@ -686,7 +754,7 @@ function renderHacks(){
     btn.innerHTML=`<div class="btn-title">${a.t}</div><div class="btn-sub">${a.s}</div>
       <div class="btn-reward">${esg?"⚠️ esgotado":"+R$~"+earn+" · +"+a.xp+"xp"}</div>
       ${degLabel?`<div class="btn-req">${degLabel}</div>`:""}
-      ${locked?`<div class="btn-req">🔒 nível ${a.lvl||""}${a.pwr?" / poder "+a.pwr+"x":""}</div>`:""}
+      ${locked?`<div class="btn-req">🔒 ${a.reqItem&&!S.owned.has(a.reqItem)?"precisa: "+a.itemLabel:(a.lvl?"nível "+a.lvl:"")+(a.pwr?" / poder "+a.pwr+"x":"")}</div>`:""}
       ${!esg&&!locked&&tc>50?`<div class="btn-req">⚠️ rastreio ${tc}%</div>`:""}
       ${cd&&!esg?`<div class="btn-req">⏳ recarregando…</div>`:""}
       ${!esg?`<div class="uses-dots">${dots}</div>`:""}`;
@@ -741,6 +809,7 @@ function doHack(a){
   }
   setTimeout(()=>rollEvent(),400);
   checkAgent();
+  saveGame();
   S.cds[a.id]=true;S.cds["__hackbusy"]=true;
   setTimeout(()=>{delete S.cds[a.id];delete S.cds["__hackbusy"];renderHacks();},a.cd);
   updateUI();
@@ -1209,7 +1278,17 @@ const SHOP={
   ],
   def:[
     {id:"firewall",n:"Firewall básico",icon:"🧱",p:50,bonus:"defesa +20%",effect:()=>{S.defense=Math.min(100,S.defense+20);}},
-    {id:"vpn",n:"VPN Pro",icon:"🔒",p:80,bonus:"defesa +25% · risco -15%",effect:()=>{S.defense=Math.min(100,S.defense+25);S.heat=Math.max(0,S.heat-15);}},
+    {id:"vpn",n:"VPN Pro",icon:"🔒",p:80,bonus:"defesa +25% · risco -15% · Salles recua",effect:()=>{
+      S.defense=Math.min(100,S.defense+25);
+      S.heat=Math.max(0,S.heat-15);
+      // VPN dificulta rastreio — Salles perde um nível
+      if(S.agent.level>0){
+        S.agent.level=Math.max(0,S.agent.level-1);
+        delete S.agent["sent_"+( S.agent.level+1)]; // permite reenvio se escalar novamente
+        log("> VPN ativa — Agente Salles perdeu o rastro temporariamente","ok");
+        toast("🔒 VPN: Salles recuou um nível!");
+      }
+    }},
     {id:"antivirus",n:"Antivírus",icon:"🦠",p:60,bonus:"dano phishing -50%",effect:()=>{}},
     {id:"emailscanner",n:"Scanner de E-mail",icon:"🔍",p:90,bonus:"detecta phishing",effect:()=>{log("> scanner de e-mail instalado!","ok");}},
     {id:"proxychains",n:"ProxyChains",icon:"🌐",p:120,bonus:"defesa +30%",effect:()=>{S.defense=Math.min(100,S.defense+30);}},
@@ -1237,7 +1316,7 @@ function renderShop(){
         for(const id in S.hackCycles){if(S.hackCycles[id]>0){S.hackCycles[id]=Math.max(0,S.hackCycles[id]-1);reduced++;}}
         if(reduced>0)log("> upgrade melhorou abordagem — alvos menos desconfiados","ok");
       }
-      checkBackdoorRemoval();updateUI();
+      checkBackdoorRemoval();updateUI();saveGame();
     };
     c.appendChild(el);
   }
@@ -1556,8 +1635,8 @@ const GROUPS=[
   {
     id:"phantom",name:"Phantom Syndicate",tag:"INTERMEDIÁRIO",tagCls:"tag-mid",
     desc:"Grupo organizado com membros em vários países. Especialistas em vazamento de dados corporativos e ataques DDoS coordenados. Mencionados em relatórios de segurança.",
-    reqLevel:6,reqRep:40,reqMission:"linux_noob",
-    joinMsg:"Requisitos: nível 6 + rep 40 + missão linux_noob concluída",
+    reqLevel:6,reqRep:40,reqMission:"linux_noob",reqVPS:true,
+    joinMsg:"Requisitos: nível 6 + rep 40 + missão linux + Servidor VPS",
     reward:{followers:800,power:0.8,xp:120},
     missions:[
       {id:"ph_ddos",t:"DDoS em banco regional",s:"tirar sistema fora do ar por 2h",m:350,xp:70,rep:7,heat:15,cd:25000},
@@ -1583,6 +1662,7 @@ function canJoinGroup(g){
   if(S.level<g.reqLevel||S.rep<g.reqRep)return false;
   if(g.reqMission&&!S.doneMissions.has(g.reqMission))return false;
   if(g.reqGroup&&S.groups.member!==g.reqGroup)return false;
+  if(g.reqVPS&&!S.owned.has("server"))return false;
   return true;
 }
 
@@ -2352,7 +2432,12 @@ function playNow(){
 function startGame(){
   document.getElementById("intro").style.display="none";
   document.getElementById("app").style.display="flex";
+  const loaded=loadGame();
   initGame();
+  if(loaded){
+    log("> progresso restaurado automaticamente.","ok");
+    toast("💾 Progresso carregado!");
+  }
 }
 
 function initGame(){
@@ -2372,6 +2457,7 @@ function initGame(){
   },9000);
   setInterval(checkVoidInvite,10000);
   setInterval(checkAgent,15000);
+  setInterval(saveGame,30000); // salva a cada 30 segundos
 }
 
 // INIT
