@@ -34,6 +34,11 @@ h1 span{color:#484f58;font-size:11px;font-weight:400;display:block;margin-top:2p
 .action-btn:active:not(.disabled){transform:scale(0.98)}
 .action-btn.disabled{opacity:0.4;cursor:not-allowed}
 .action-btn.esgotado{opacity:0.3;cursor:not-allowed;border-color:#21262d}
+/* cards compactos para travados e concluídos */
+.action-btn.compact{padding:6px 12px;display:flex;align-items:center;gap:8px}
+.action-btn.compact .btn-title{font-size:10px;font-weight:600;margin:0}
+.action-btn.compact-done{border-color:#238636;opacity:0.6}
+.action-btn.compact-locked{opacity:0.35}
 .btn-title{font-size:13px;font-weight:700;color:#e6edf3}
 .btn-sub{font-size:11px;color:#484f58;margin-top:2px}
 .btn-reward{font-size:11px;font-weight:700;color:#3fb950;margin-top:4px}
@@ -148,6 +153,8 @@ h1 span{color:#484f58;font-size:11px;font-weight:400;display:block;margin-top:2p
 .news-group{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px}
 .alert-bar{background:#1a0a0a;border:1px solid #f85149;border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px}
 .alert-bar.hidden{display:none}
+.vuln-bar{background:#1a1400;border:1px solid #5a4a00;border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px;transition:opacity 0.3s}
+.vuln-bar.hidden{display:none}
 /* modal missão */
 .modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.88);z-index:200;align-items:center;justify-content:center;padding:16px}
 .modal-bg.open{display:flex}
@@ -219,7 +226,15 @@ h1 span{color:#484f58;font-size:11px;font-weight:400;display:block;margin-top:2p
     <div style="font-size:11px;font-weight:700;color:#f85149" id="alert-title">ALERTA</div>
     <div style="font-size:10px;color:#c9d1d9" id="alert-msg"></div>
   </div>
-  <button onclick="document.getElementById('alert-bar').classList.add('hidden')" style="background:#2a0a0a;border:1px solid #f85149;border-radius:6px;color:#f85149;padding:3px 8px;font-size:10px;cursor:pointer">ok</button>
+  <button onclick="document.getElementById('alert-bar').classList.add('hidden');updateVulnIndicator()" style="background:#2a0a0a;border:1px solid #f85149;border-radius:6px;color:#f85149;padding:3px 8px;font-size:10px;cursor:pointer">ok</button>
+</div>
+
+<div class="vuln-bar hidden" id="vuln-bar">
+  <span style="font-size:16px">⚠️</span>
+  <div style="flex:1">
+    <div style="font-size:11px;font-weight:700;color:#e3b341">SISTEMA VULNERÁVEL</div>
+    <div style="font-size:10px;color:#c9d1d9" id="vuln-msg">risco alto + defesa baixa = alvo fácil</div>
+  </div>
 </div>
 
 <!-- 1. STATS -->
@@ -468,7 +483,29 @@ function getRank(){let r=RANKS[0];for(const k of RANKS)if(S.level>=k.min)r=k;ret
 function traceChance(){return Math.max(0,Math.round(S.heat*(1-S.defense/100)));}
 function toast(m){const e=document.getElementById("toast");e.textContent=m;e.classList.add("show");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("show"),2600);}
 function log(m,c=""){const t=document.getElementById("terminal");const d=document.createElement("div");d.className="line "+c;d.textContent=m;t.appendChild(d);t.scrollTop=t.scrollHeight;if(t.children.length>60)t.removeChild(t.children[0]);}
-function showAlert(t,m){document.getElementById("alert-title").textContent=t;document.getElementById("alert-msg").textContent=m;document.getElementById("alert-bar").classList.remove("hidden");}
+function showAlert(t,m){document.getElementById("alert-title").textContent=t;document.getElementById("alert-msg").textContent=m;document.getElementById("alert-bar").classList.remove("hidden");updateVulnIndicator();}
+
+function updateVulnIndicator(){
+  const vuln=document.getElementById("vuln-bar");
+  const alertActive=!document.getElementById("alert-bar").classList.contains("hidden");
+  // alerta vermelho tem prioridade — esconde o amarelo
+  if(alertActive){vuln.classList.add("hidden");return;}
+  // condições de vulnerabilidade
+  const isVuln=S.heat>50&&S.defense<20&&!S.owned.has("firewall");
+  const hasSpyware=S._spyware===true;
+  const hasBackdoor=S._backdoor===true;
+  if(isVuln||hasSpyware||hasBackdoor){
+    let msg="";
+    if(hasSpyware) msg="spyware ativo — compre IDS/IPS para remover";
+    else if(hasBackdoor) msg="backdoor instalado — compre IDS/IPS para remover";
+    else if(isVuln&&!S.owned.has("firewall")) msg="sem firewall + risco alto = alvo fácil — compre Firewall (R$50)";
+    else msg="risco alto + defesa baixa — faça deliveries ou compre upgrades de defesa";
+    document.getElementById("vuln-msg").textContent=msg;
+    vuln.classList.remove("hidden");
+  } else {
+    vuln.classList.add("hidden");
+  }
+}
 // ---- OBJETIVOS PROGRESSIVOS ----
 const OBJECTIVES=[
   {id:"first_delivery",  text:"Faça sua primeira entrega",              sub:"delivery → 'Delivery de pizza' — grana rápida e segura",        check:()=>S._totalDelivery>0},
@@ -582,6 +619,7 @@ function updateUI(){
   document.getElementById("trace-chance").textContent=tc+"%";
   document.getElementById("trace-chance").style.color=tc>70?"#f85149":tc>30?"#e3b341":"#3fb950";
   renderHacks();renderMissions();renderFreelance();renderBlog();renderCourses();renderDelivery();renderShop();updateSocial();renderGroups();renderObjectives();
+  updateVulnIndicator();
 }
 
 // INBOX
@@ -689,14 +727,16 @@ function acceptMissionEmail(id){
 
 // HACKS
 const HACKS=[
-  {id:"wifi",    t:"Quebrar Wi-Fi vizinho",    s:"brute force básico",           m:15, xp:10,rep:1,heat:5, cd:3000, max:5,reset:60000},
-  {id:"phish",   t:"Phishing simples",         s:"e-mail falso de banco",         m:40, xp:20,rep:2,heat:8, cd:5000, max:4,reset:90000},
-  {id:"scrape",  t:"Vazar dados",              s:"scraping + dark web",           m:90, xp:35,rep:4,heat:12,cd:7000, max:3,reset:120000,lvl:2,pwr:2},
-  {id:"ransom",  t:"Ransomware local",         s:"empresa pequena",               m:220,xp:60,rep:8,heat:20,cd:10000,max:2,reset:180000,lvl:4,pwr:3},
+  {id:"wifi",      t:"Quebrar Wi-Fi vizinho",        s:"brute force básico",                          m:15, xp:10,rep:1,heat:5, cd:3000, max:5,reset:60000},
+  {id:"phish",     t:"Phishing simples",             s:"e-mail falso de banco",                       m:40, xp:20,rep:2,heat:8, cd:5000, max:4,reset:90000},
+  {id:"ftp",       t:"Invadir servidor FTP",         s:"credencial padrão, baixar arquivos internos", m:70, xp:28,rep:3,heat:10,cd:6000, max:4,reset:100000,lvl:2},
+  {id:"ddos",      t:"Derrubar site (DDoS)",         s:"flood de requisições até o servidor cair",    m:55, xp:22,rep:3,heat:12,cd:5000, max:4,reset:90000, lvl:2},
+  {id:"scrape",    t:"Vazar dados",                  s:"scraping + dark web",                         m:90, xp:35,rep:4,heat:12,cd:7000, max:3,reset:120000,lvl:2,pwr:2},
+  {id:"ransom",    t:"Ransomware local",             s:"empresa pequena",                             m:220,xp:60,rep:8,heat:20,cd:10000,max:2,reset:180000,lvl:4,pwr:3},
   // desbloqueados por upgrades
-  {id:"cameras", t:"Invadir câmeras de segurança", s:"acesso remoto a câmeras IP mal configuradas", m:110,xp:40,rep:5,heat:14,cd:8000,max:3,reset:120000,lvl:2,reqItem:"ram",  itemLabel:"RAM 16GB"},
-  {id:"cryptojack",t:"Cryptojacking",          s:"minerar crypto na máquina alheia",               m:160,xp:55,rep:6,heat:16,cd:9000,max:3,reset:150000,lvl:3,reqItem:"gpu",  itemLabel:"GPU usada"},
-  {id:"wifi_pro",t:"Interceptar tráfego de rede",s:"sniffing avançado com antena potente",         m:85, xp:30,rep:3,heat:10,cd:6000,max:4,reset:90000, lvl:1,reqItem:"antena",itemLabel:"Antena Wi-Fi"},
+  {id:"cameras",   t:"Invadir câmeras de segurança", s:"acesso remoto a câmeras IP mal configuradas", m:110,xp:40,rep:5,heat:14,cd:8000, max:3,reset:120000,lvl:2,reqItem:"ram",   itemLabel:"RAM 16GB"},
+  {id:"cryptojack",t:"Cryptojacking",               s:"minerar crypto na máquina alheia",             m:160,xp:55,rep:6,heat:16,cd:9000, max:3,reset:150000,lvl:3,reqItem:"gpu",   itemLabel:"GPU usada"},
+  {id:"wifi_pro",  t:"Interceptar tráfego de rede", s:"sniffing avançado com antena potente",         m:85, xp:30,rep:3,heat:10,cd:6000, max:4,reset:90000, lvl:1,reqItem:"antena",itemLabel:"Antena Wi-Fi"},
 ];
 
 // retorna o multiplicador de degradação baseado em ciclos repetidos (entre resets)
@@ -739,8 +779,25 @@ function hackDegLabel(cycles, usesDone, streak){
 
 function renderHacks(){
   const c=document.getElementById("hack-actions");c.innerHTML="";
-  for(const a of HACKS){
+  const sorted=[...HACKS].sort((a,b)=>{
+    const aLocked=(a.lvl&&S.level<a.lvl)||(a.pwr&&S.power<a.pwr)||(a.reqItem&&!S.owned.has(a.reqItem));
+    const bLocked=(b.lvl&&S.level<b.lvl)||(b.pwr&&S.power<b.pwr)||(b.reqItem&&!S.owned.has(b.reqItem));
+    const aEsg=getUses(a.id,a.max)<=0, bEsg=getUses(b.id,b.max)<=0;
+    if(!!aLocked!==!!bLocked) return aLocked?1:-1;
+    if(aEsg!==bEsg) return aEsg?1:-1;
+    return (a.lvl||0)-(b.lvl||0);
+  });
+  for(const a of sorted){
     const u=getUses(a.id,a.max),locked=(a.lvl&&S.level<a.lvl)||(a.pwr&&S.power<a.pwr)||(a.reqItem&&!S.owned.has(a.reqItem)),cd=!!S.cds[a.id]||!!S.cds["__hackbusy"],esg=u<=0;
+    // card compacto para travados e esgotados
+    if(locked||esg){
+      const btn=document.createElement("div");
+      btn.className="action-btn compact compact-locked disabled"+(esg?" esgotado":"");
+      btn.innerHTML=`<span style="font-size:11px">${esg?"⏳":"🔒"}</span>
+        <div class="btn-title">${a.t} <span style="font-weight:400;color:#484f58;font-size:9px">— ${esg?"aguardando novos alvos":a.reqItem&&!S.owned.has(a.reqItem)?"precisa: "+a.itemLabel:a.pwr&&S.power<a.pwr?"poder "+a.pwr+"x":"nível "+a.lvl}</span></div>`;
+      c.appendChild(btn);
+      continue;
+    }
     const {cycles,earningMult}=hackDegradation(a.id);
     const usesDone=a.max-(u);
     const inCycleMult=inCycleEarnMult(a.id,a.max);
@@ -771,14 +828,16 @@ function doHack(a){
   const {cycles,earningMult,heatMult}=hackDegradation(a.id);
   const inCycleMult=inCycleEarnMult(a.id,a.max);
   const seqBonus=sequenceHeatBonus(a.id);
-  const earn=Math.round((a.m*S.power*0.6+a.m*0.4)*earningMult*inCycleMult);
+  const earn=Math.round((a.m*S.power*0.6+a.m*0.4)*earningMult*inCycleMult*getEventEarnMult());
   const heatCost=Math.round(a.heat*heatMult)+seqBonus;
+  const cd=Math.round(a.cd*getEventCdMult());
 
   S.money+=earn;gainXP(a.xp);S.rep+=a.rep;S.heat=Math.min(100,S.heat+heatCost);S.uses[a.id]--;
   S._totalEarned=(S._totalEarned||0)+earn;
   S._firstHackDone=true;
   S._lastHackId=a.id;
   if(S._backdoor){ S.heat=Math.min(100,S.heat+2); log("> backdoor ativo: risco +2% extra","err"); }
+  if(S._spyware){ S.heat=Math.min(100,S.heat+3); } // spyware vaza info dos hacks
 
   const usesDone=a.max-S.uses[a.id];
   if(seqBonus>0) log("> [sequência] mesmo hack "+S._sameHackStreak+"x seguidas — risco +"+seqBonus+"% extra","warn");
@@ -811,7 +870,7 @@ function doHack(a){
   checkAgent();
   saveGame();
   S.cds[a.id]=true;S.cds["__hackbusy"]=true;
-  setTimeout(()=>{delete S.cds[a.id];delete S.cds["__hackbusy"];renderHacks();},a.cd);
+  setTimeout(()=>{delete S.cds[a.id];delete S.cds["__hackbusy"];renderHacks();},cd);
   updateUI();
 }
 
@@ -1000,6 +1059,102 @@ function checkBackdoorRemoval(){
   }
 }
 
+// ---- DEFACEMENT DO BLOG ----
+let _blogDefaceInterval=null;
+
+function triggerBlogDefacement(){
+  if(!S.blog.created||S.owned.has("waf")||S._blogDefaced)return;
+  S._blogDefaced=true;
+  const downtime=120000; // 2 minutos fora do ar
+
+  showAlert("🖥️ SEU BLOG FOI DERRUBADO","Outro hacker fez defacement do seu blog. Renda pausada por 2 minutos. Instale um WAF para se proteger.");
+  log("> [!!!] blog derrubado por defacement — renda pausada","err");
+  log("> acesse upgrades → defesa → WAF para se proteger","warn");
+  toast("🖥️ Blog derrubado! Renda pausada.");
+
+  // parar renda do blog temporariamente via flag
+  S._blogDown=true;
+  updateUI();
+
+  setTimeout(()=>{
+    S._blogDefaced=false;
+    S._blogDown=false;
+    log("> blog restaurado — renda voltando normalmente","ok");
+    toast("✅ Blog restaurado!");
+    updateUI();
+  },downtime);
+}
+
+function startBlogDefaceCheck(){
+  if(_blogDefaceInterval)return;
+  _blogDefaceInterval=setInterval(()=>{
+    if(!S.blog.created||S.owned.has("waf")||S._blogDefaced)return;
+    // chance maior se defesa baixa
+    const chance=S.defense<20?0.08:S.defense<40?0.04:0.015;
+    if(Math.random()<chance) triggerBlogDefacement();
+    // se tem WAF, ocasionalmente mostrar tentativa bloqueada
+    if(S.owned.has("waf")&&Math.random()<0.03){
+      log("> [WAF] tentativa de defacement bloqueada — atacante barrado","ok");
+      toast("🛡️ WAF bloqueou ataque ao blog!");
+    }
+  },30000);
+}
+function installSpyware(){
+  if(S._spyware||S.owned.has("ids")||S.owned.has("firewall"))return;
+  S._spyware=true;
+  S._spywareInstalledAt=Date.now();
+  // sem alerta — completamente silencioso
+  // apenas log vago no terminal para o jogador atento
+  setTimeout(()=>{
+    log("> processo desconhecido usando 12% da CPU","dim");
+  },Math.random()*30000+10000);
+  setTimeout(()=>{
+    log("> conexão de saída detectada: destino desconhecido","dim");
+  },Math.random()*60000+30000);
+  // iniciar dano passivo
+  startSpywareDamage();
+}
+
+function startSpywareDamage(){
+  if(!S._spyware)return;
+  S._spywareInterval=setInterval(()=>{
+    if(!S._spyware){clearInterval(S._spywareInterval);return;}
+    const loss=Math.round(8+Math.random()*7); // R$8-15
+    S.money=Math.max(0,S.money-loss);
+    S._spywareTotalLost=(S._spywareTotalLost||0)+loss;
+    updateUI();
+  },120000); // a cada 2 minutos
+}
+
+function checkSpywareDetection(){
+  // IDS/IPS detecta e remove
+  if(S._spyware&&S.owned.has("ids")){
+    S._spyware=false;
+    clearInterval(S._spywareInterval);
+    const lost=S._spywareTotalLost||0;
+    log("> [IDS] processo suspeito encontrado: spy_agent.exe","warn");
+    log("> [IDS] spyware removido! total drenado: R$"+lost,"ok");
+    toast("🔍 Spyware detectado e removido pelo IDS!");
+    showAlert("🦠 SPYWARE REMOVIDO","IDS/IPS encontrou spy_agent.exe. Alguém estava te monitorando. Total drenado: R$"+lost+".");
+    S._spywareTotalLost=0;
+    updateUI();
+  }
+}
+
+// SMS de pista do Kr4ck3r_BR quando vulnerável há tempo demais
+let _spywareWarnSent=false;
+function checkSpywareVulnerability(){
+  if(_spywareWarnSent)return;
+  if(S.heat>50&&S.defense<20&&!S.owned.has("firewall")&&!S.owned.has("ids")){
+    _spywareWarnSent=true;
+    setTimeout(()=>{
+      addSMS({from:"Kr4ck3r_BR",
+        text:"ei, tá com defesa baixa há muito tempo. isso atrai gente indesejada. não só a polícia. fica esperto.",
+        isMe:false});
+    },5000);
+  }
+}
+
 // REDE SOCIAL
 const SOCIAL_BIOS=["novato no submundo. ainda aprendendo.","explorando os limites da rede.","informação é poder. poder é tudo.","anônimo. onipresente. inevitável.","o sistema tem falhas. eu as encontro.","eles constroem paredes. eu acho portas."];
 const HACK_POSTS={
@@ -1087,32 +1242,52 @@ function setupSocialButtons(){
 
 // MISSÕES ESPECIAIS
 const MISSIONS=[
-  {id:"linux_noob",t:"Invadir servidor Linux novato",s:"credenciais fracas, alvo descuidado",
-   reward:"+R$150 · +50xp · rep +6",m:150,xp:50,rep:6,heat:15,
+  {id:"linux_noob",    t:"Invadir servidor Linux novato",  s:"credenciais fracas, alvo descuidado",              reward:"+R$150 · +50xp · rep +6",          m:150,xp:50, rep:6, heat:15,lvl:1,
    hints:["tenta o usuário mais óbvio","senha de preguiçoso...","usuário: admin  senha: admin"]},
-  {id:"crypto_airdrop",t:"Phishing: Crypto Airdrop",s:"fingir ser projeto famoso, roubar carteiras",
-   reward:"+R$320 · +70xp · rep +8",m:320,xp:70,rep:8,heat:18,
+  {id:"sqli",          t:"SQL Injection manual",           s:"extrair banco de dados de e-commerce vulnerável",  reward:"+R$260 · +65xp · rep +7",          m:260,xp:65, rep:7, heat:16,lvl:2,
+   hints:["tenta fechar a query com aspas simples","o payload clássico é ' OR '1'='1","campo de login: ' OR '1'='1' --"]},
+  {id:"crypto_airdrop",t:"Phishing: Crypto Airdrop",      s:"fingir ser projeto famoso, roubar carteiras",      reward:"+R$320 · +70xp · rep +8",          m:320,xp:70, rep:8, heat:18,lvl:2,
    hints:["qual projeto crypto mais famoso do momento?","o domínio precisa parecer oficial — troca uma letra","a carteira destino tem que parecer legítima"]},
-  {id:"honeytrap_gps",t:"Armadilha: Foto Vazada",s:"isca digital com rastreador GPS — alvo para a polícia",
-   reward:"+R$0 · +80xp · rep +15 · risco -10%",m:0,xp:80,rep:15,heat:-10,
+  {id:"defacement",    t:"Defacement comemorativo",        s:"invadir site de prefeitura — deixar mensagem",     reward:"+R$0 · +60xp · rep +12 · +300 seg", m:0,  xp:60, rep:12,heat:14,lvl:3,
+   hints:["acesse o painel admin do site","senha padrão de CMS: admin/admin123","a mensagem precisa ter o nome de um hacker famoso"]},
+  {id:"honeytrap_gps", t:"Armadilha: Foto Vazada",        s:"isca digital com rastreador GPS — alvo para polícia",reward:"+R$0 · +80xp · rep +15 · risco -10%",m:0, xp:80, rep:15,heat:-10,lvl:4,
    hints:["o link precisa parecer tentador e real","o pixel de rastreio é invisível na imagem","ao abrir, captura IP + GPS e envia direto para a delegacia"]},
-  {id:"blackout",t:"Operação Blackout",s:"hackear o Banco Central — e escapar da polícia",
-   reward:"+R$1.800 · +120xp · rep +20 · decisão sob pressão",m:0,xp:0,rep:0,heat:0,lvl:5,
+  {id:"blackout",      t:"Operação Blackout",              s:"hackear o Banco Central — e escapar da polícia",   reward:"+R$1.800 · +120xp · rep +20",       m:0,  xp:0,  rep:0,  heat:0, lvl:5,
    hints:["Log4Shell é a vulnerabilidade mais famosa de 2021","extraia o que vale mais: chaves de API","quando a polícia chegar, decida rápido — o tempo corre"]},
 ];
 
 function renderMissions(){
   const c=document.getElementById("mission-actions");c.innerHTML="";
-  for(const m of MISSIONS){
+  // ordenar: concluídas por último, ativas (desbloqueadas) primeiro, travadas depois — dentro de cada grupo por nível
+  const sorted=[...MISSIONS].sort((a,b)=>{
+    const aDone=S.doneMissions.has(a.id), bDone=S.doneMissions.has(b.id);
+    const aLocked=a.lvl&&S.level<a.lvl, bLocked=b.lvl&&S.level<b.lvl;
+    if(aDone!==bDone) return aDone?1:-1;       // concluídas por último
+    if(!!aLocked!==!!bLocked) return aLocked?1:-1; // travadas depois das ativas
+    return (a.lvl||0)-(b.lvl||0);              // dentro do grupo, por nível
+  });
+  for(const m of sorted){
     const done=S.doneMissions.has(m.id);
     const locked=m.lvl&&S.level<m.lvl;
-    const btn=document.createElement("div");btn.className="action-btn"+(done||locked?" disabled":"");
-    if(done)btn.style.borderColor="#238636";
-    btn.innerHTML=`<div class="btn-title">${done?"✓ ":""}${m.t}</div><div class="btn-sub">${m.s}</div>
-      <div class="btn-reward">${done?"concluída":m.reward}</div>
-      ${locked?`<div class="btn-req">🔒 nível ${m.lvl}</div>`:""}
-      ${!done&&!locked?`<div class="btn-req" style="color:#79c0ff">▶ missão interativa</div>`:""}`;
-    if(!done&&!locked)btn.onclick=()=>m.id==="blackout"?startBlackoutMission():openMission(m.id);
+    if(done){
+      const btn=document.createElement("div");
+      btn.className="action-btn compact compact-done disabled";
+      btn.innerHTML=`<span style="font-size:11px;color:#3fb950">✓</span><div class="btn-title" style="color:#3fb950">${m.t}</div>`;
+      c.appendChild(btn); continue;
+    }
+    if(locked){
+      const btn=document.createElement("div");
+      btn.className="action-btn compact compact-locked disabled";
+      btn.innerHTML=`<span style="font-size:11px">🔒</span><div class="btn-title">${m.t} <span style="font-weight:400;color:#484f58;font-size:9px">— nível ${m.lvl}</span></div>`;
+      c.appendChild(btn); continue;
+    }
+    // card completo — missão disponível
+    const btn=document.createElement("div");btn.className="action-btn";
+    btn.innerHTML=`<div class="btn-title">${m.t}</div>
+      <div class="btn-sub">${m.s}</div>
+      <div class="btn-reward">${m.reward}</div>
+      <div class="btn-req" style="color:#79c0ff">▶ missão interativa</div>`;
+    btn.onclick=()=>m.id==="blackout"?startBlackoutMission():openMission(m.id);
     c.appendChild(btn);
   }
 }
@@ -1158,6 +1333,7 @@ function renderBlog(){
   }
   const inc=Math.round(S.blog.posts*2.5*(1+S.blog.visitors/200));
   lbl.textContent="ativo · "+S.blog.posts+" posts";lbl.style.color="#3fb950";
+  if(S._blogDown){lbl.textContent="⚠️ fora do ar — sob ataque";lbl.style.color="#f85149";}
   sec.innerHTML=`<div style="background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 12px;margin-bottom:8px">
     <div class="blog-stat"><span style="color:#484f58">posts</span><span style="color:#e6edf3">${S.blog.posts}</span></div>
     <div class="blog-stat"><span style="color:#484f58">visitantes/dia</span><span style="color:#58a6ff">${S.blog.visitors}</span></div>
@@ -1184,11 +1360,12 @@ function createBlog(){
   if(S.money<50){toast("Precisa de R$50.");return;}
   S.money-=50;S.blog.created=true;
   log("> blog criado! escreva posts para ganhar renda passiva.","ok");toast("🌐 Blog criado!");
+  startBlogDefaceCheck();
   updateUI();
   setInterval(()=>{
-    if(!S.blog.created||S.blog.posts===0)return;
-    const inc=Math.round(S.blog.posts*2.5*(1+S.blog.visitors/200));
-    if(inc>0){S.money+=inc;S.blog.income+=inc;updateUI();}
+    if(!S.blog.created||S.blog.posts===0||S._blogDown)return;
+    const inc=Math.round(S.blog.posts*2.5*(1+S.blog.visitors/200)*(S._eventEarnBonus||1));
+    if(inc>0){S.money+=inc;S.blog.income+=inc;S._totalEarned=(S._totalEarned||0)+inc;updateUI();}
   },15000);
 }
 
@@ -1293,6 +1470,7 @@ const SHOP={
     {id:"emailscanner",n:"Scanner de E-mail",icon:"🔍",p:90,bonus:"detecta phishing",effect:()=>{log("> scanner de e-mail instalado!","ok");}},
     {id:"proxychains",n:"ProxyChains",icon:"🌐",p:120,bonus:"defesa +30%",effect:()=>{S.defense=Math.min(100,S.defense+30);}},
     {id:"ids",n:"IDS/IPS",icon:"👁️",p:180,bonus:"defesa +25%",effect:()=>{S.defense=Math.min(100,S.defense+25);}},
+    {id:"waf",n:"WAF — Web App Firewall",icon:"🛡️",p:100,bonus:"protege blog de defacement",effect:()=>{log("> WAF instalado — blog protegido contra ataques","ok");toast("🛡️ WAF ativo! Blog protegido.");S.defense=Math.min(100,S.defense+10);}},
   ],
   del:[
     {id:"moto_prop",n:"Moto própria",icon:"🏍️",p:130,bonus:"delivery +50%",effect:()=>{}},
@@ -1316,7 +1494,7 @@ function renderShop(){
         for(const id in S.hackCycles){if(S.hackCycles[id]>0){S.hackCycles[id]=Math.max(0,S.hackCycles[id]-1);reduced++;}}
         if(reduced>0)log("> upgrade melhorou abordagem — alvos menos desconfiados","ok");
       }
-      checkBackdoorRemoval();updateUI();saveGame();
+      checkBackdoorRemoval();checkSpywareDetection();updateUI();saveGame();
     };
     c.appendChild(el);
   }
@@ -1358,7 +1536,27 @@ function openMission(id){
     mlog("","");
     document.getElementById("mprompt").textContent="escolha (1-3): ";
     document.getElementById("minput").focus();
-  } else if(id==="crypto_airdrop"){
+  } else if(id==="sqli"){
+    mlog("// SQL INJECTION — alvo: loja_xyz.com.br","sys");
+    mlog("","");
+    mlog("encontrado: formulário de login sem sanitização","warn");
+    mlog("banco: MySQL 5.6 — sem prepared statements","warn");
+    mlog("","");
+    mlog("PASSO 1/2 — qual campo você vai atacar?","");
+    mlog("  [1] campo de usuário (login)","dim");
+    mlog("  [2] campo de senha (password)","dim");
+    mlog("  [3] campo de busca de produtos","dim");
+    mlog("","");
+    setTimeout(()=>{document.getElementById("mprompt").textContent="campo (1-3): ";document.getElementById("minput").focus();},400);
+  } else if(id==="defacement"){
+    mlog("// DEFACEMENT COMEMORATIVO — alvo: prefeitura-mg.gov.br","sys");
+    mlog("","");
+    mlog("CMS identificado: WordPress 4.9.8 (desatualizado)","warn");
+    mlog("painel admin: prefeitura-mg.gov.br/wp-admin","warn");
+    mlog("","");
+    mlog("PASSO 1/3 — tente fazer login no painel:","");
+    mlog("","");
+    setTimeout(()=>{document.getElementById("mprompt").textContent="usuário: ";document.getElementById("minput").focus();},400);
     mlog("// OPERAÇÃO: CRYPTO AIRDROP PHISHING","sys");
     mlog("","");
     mlog("Você vai montar um e-mail falso fingindo ser um","");
@@ -1389,6 +1587,8 @@ function submitMission(){
   const val=document.getElementById("minput").value.trim();if(!val)return;
   if(_mission==="__invasion__"){submitInvasionReaction();return;}
   if(_mission==="vx_technova"){submitTechNova();return;}
+  if(_mission==="sqli"){submitSQLI();return;}
+  if(_mission==="defacement"){submitDefacement();return;}
   if(_mission==="blackout"){
     if(_blackoutPhase===1)submitBlackout();
     else if(_blackoutPhase===2)submitBlackoutEscape();
@@ -1609,10 +1809,112 @@ const NEWS_ITEMS=[
   {src:"The Intercept BR",grp:"TechNova",gcls:"tag-init",style:"background:#1a1500;color:#e3b341",h:"Documentos mostram que TechNova processou R$2bi em transferências sem origem declarada",t:"há 1 mês"},
 ];
 
+// ---- EVENTOS GLOBAIS ----
+// evento ativo no momento
+let activeEvent=null;
+
+const GLOBAL_EVENTS=[
+  // negativos
+  {id:"pf_op",   type:"bad",  dur:300000, tag:"🚔 ALERTA",  tagStyle:"background:#2a0505;color:#f85149",
+   src:"G1 Segurança", h:"PF intensifica Operação Fantasma contra hackers brasileiros",
+   desc:"Agente Salles ganha 1 nível automaticamente.",
+   effect:()=>{ S.agent.level=Math.min(4,S.agent.level+1); agentLog(S.agent.level); updateUI(); },
+   revert:()=>{}},
+  {id:"bc_defense", type:"bad", dur:240000, tag:"📉 RUIM",  tagStyle:"background:#2a1500;color:#e3b341",
+   src:"Banco Central BR", h:"Banco Central reforça segurança após incidente — sistemas em modo de alerta",
+   desc:"Operação Blackout rende 50% menos por 4 minutos.",
+   effect:()=>{ S._eventBlackoutPenalty=0.5; },
+   revert:()=>{ delete S._eventBlackoutPenalty; }},
+  {id:"isp_block", type:"bad", dur:180000, tag:"📉 RUIM",   tagStyle:"background:#2a1500;color:#e3b341",
+   src:"Anatel", h:"Provedores bloqueiam tráfego suspeito após pico de ataques DDoS",
+   desc:"Cooldown dos hacks dobra por 3 minutos.",
+   effect:()=>{ S._eventCdMult=2; },
+   revert:()=>{ delete S._eventCdMult; }},
+  // positivos
+  {id:"vuln_exposed", type:"good", dur:240000, tag:"🔥 OPORT.", tagStyle:"background:#0a2a0a;color:#3fb950",
+   src:"The Hacker News", h:"Falha crítica CVE-2024-9999 exposta em servidores corporativos — patch ainda não disponível",
+   desc:"Todos os hacks rendem +40% por 4 minutos.",
+   effect:()=>{ S._eventEarnBonus=1.4; },
+   revert:()=>{ delete S._eventEarnBonus; }},
+  {id:"isp_instability", type:"good", dur:180000, tag:"🔥 OPORT.", tagStyle:"background:#0a2a0a;color:#3fb950",
+   src:"Teleco", h:"Operadora sofre instabilidade crítica — sistemas corporativos vulneráveis",
+   desc:"Usos dos hacks dobram por 3 minutos.",
+   effect:()=>{ S._eventUsesBonus=true; },
+   revert:()=>{ delete S._eventUsesBonus; }},
+  {id:"crypto_high", type:"good", dur:300000, tag:"💰 BÔNUS",  tagStyle:"background:#0a2a0a;color:#3fb950",
+   src:"CoinDesk BR", h:"Bitcoin atinge nova máxima — comunidade crypto em euforia e doações aumentam",
+   desc:"Doações da rede social +100% por 5 minutos.",
+   effect:()=>{ S._eventDonationBonus=2; },
+   revert:()=>{ delete S._eventDonationBonus; }},
+  // narrativos
+  {id:"rodrigo_hired", type:"narrative", dur:0, tag:"📰 NEWS",  tagStyle:"background:#1a1500;color:#e3b341",
+   src:"LinkedIn Tech", h:"Rodrigo Menezes contratado como Head de Segurança da Vortex Corp",
+   desc:"A narrativa avança. Ele está cada vez mais protegido.",
+   effect:()=>{ log("> r0drig0 contratado pela Vortex Corp. ele está se protegendo.","warn"); },
+   revert:()=>{}},
+  {id:"void_attack", type:"narrative", dur:0, tag:"📰 NEWS",   tagStyle:"background:#2a0a2a;color:#a371f7",
+   src:"Reuters Tech", h:"0xVoid ataca infraestrutura de telecomunicações europeia — reputação do grupo explode",
+   desc:"Reputação do 0xVoid aumenta globalmente.",
+   effect:()=>{ if(S.groups.member==="vxvoid"){S.rep+=5;gainFollowers(50);log("> 0xVoid nas notícias — você ganhou rep e seguidores","ok");} },
+   revert:()=>{}},
+];
+
+let _eventTimeout=null;
+let _narrativesDone=new Set();
+
+function triggerGlobalEvent(){
+  // escolher evento — evita repetir narrativos
+  const available=GLOBAL_EVENTS.filter(e=>{
+    if(e.type==="narrative") return !_narrativesDone.has(e.id);
+    return true;
+  });
+  if(!available.length)return;
+  const ev=available[Math.floor(Math.random()*available.length)];
+  if(ev.type==="narrative") _narrativesDone.add(ev.id);
+
+  // reverter evento anterior se houver
+  if(activeEvent){clearTimeout(_eventTimeout);activeEvent.revert();activeEvent=null;}
+
+  activeEvent=ev;
+  ev.effect();
+
+  // adicionar no topo do feed
+  NEWS_ITEMS.unshift({
+    src:ev.src, grp:ev.tag, gcls:"", style:ev.tagStyle,
+    h:ev.h, t:"agora · "+ev.desc, isEvent:true
+  });
+  if(NEWS_ITEMS.length>20)NEWS_ITEMS.pop();
+
+  // notificar
+  const icon=ev.type==="good"?"🔥":ev.type==="bad"?"⚠️":"📰";
+  toast(icon+" Notícia: "+ev.h.substring(0,50)+"...");
+  log("> [EVENTO] "+ev.h,"warn");
+  log("> [EVENTO] efeito: "+ev.desc,"dim");
+
+  // marcar badge de notícias no celular
+  const newsBtn=document.querySelector(".phone-app[data-tab='news']");
+  if(newsBtn) newsBtn.style.background="#1a2a0a";
+  setTimeout(()=>{if(newsBtn)newsBtn.style.background="";},5000);
+
+  if(S.phoneTab==="news")renderNewsTab();
+
+  // reverter após duração (se não for narrativo)
+  if(ev.dur>0){
+    _eventTimeout=setTimeout(()=>{
+      ev.revert(); activeEvent=null;
+      log("> [EVENTO] encerrado: "+ev.h.substring(0,40)+"...","dim");
+    },ev.dur);
+  }
+}
+
+// aplicar bônus de evento nos hacks
+function getEventEarnMult(){ return S._eventEarnBonus||1; }
+function getEventCdMult(){ return S._eventCdMult||1; }
+
 function renderNewsTab(){
   const body=document.getElementById("phone-body");
   body.innerHTML=NEWS_ITEMS.map(n=>`
-    <div class="news-item">
+    <div class="news-item" style="${n.isEvent?"border-left:2px solid #3fb950;padding-left:10px":""}">
       <div class="news-source">${n.src} <span class="news-group" style="${n.style}">${n.grp}</span></div>
       <div class="news-headline">${n.h}</div>
       <div class="news-time">${n.t}</div>
@@ -2083,6 +2385,134 @@ function runIntro(){
   });
 }
 
+// ---- SQL INJECTION ----
+function submitSQLI(){
+  const val=document.getElementById("minput").value.trim();
+  document.getElementById("minput").value="";
+  const CAMPOS={"1":"usuário","2":"senha","3":"busca de produtos"};
+
+  if(_step===0){
+    if(!CAMPOS[val]){mlog("opção inválida.","err");return;}
+    mlog("campo: "+CAMPOS[val],"");
+    mlog("","");
+    mlog("PASSO 2/2 — insira o payload SQL:","");
+    mlog("dica: o objetivo é fazer a query retornar verdadeiro","dim");
+    mlog("","");
+    document.getElementById("mprompt").textContent="payload: ";
+    _step=1; _user=val;
+  } else if(_step===1){
+    mlog("payload: "+val,"");
+    document.getElementById("minput-row").style.display="none";
+    const success=val.includes("'")&&(val.toLowerCase().includes("or")||val.includes("--")||val.includes("1=1"));
+    setTimeout(()=>mlog("enviando para o servidor...","dim"),300);
+    setTimeout(()=>mlog("resposta HTTP: 200 OK","dim"),1000);
+    setTimeout(()=>{
+      if(success){
+        mlog("","");
+        mlog("query executada: SELECT * FROM users WHERE user='' OR '1'='1'","warn");
+        mlog("resultado: 4.847 registros retornados","ok");
+        mlog("","");
+        setTimeout(()=>mlog("extraindo tabela de clientes...","dim"),400);
+        setTimeout(()=>mlog("nome, email, cpf, cartão — tudo exposto","warn"),1000);
+        setTimeout(()=>{
+          mlog("","");
+          mlog(">>> INJEÇÃO CONCLUÍDA — banco extraído","ok");
+          mlog("+R$260 · +65xp · rep +7","ok");
+          const m=MISSIONS.find(x=>x.id==="sqli");
+          S.money+=m.m;gainXP(m.xp);S.rep+=m.rep;S.heat=Math.min(100,S.heat+m.heat);
+          S.doneMissions.add("sqli");S._totalEarned=(S._totalEarned||0)+m.m;
+          log("> SQL Injection concluído → R$"+m.m,"ok");toast("💉 SQL Injection! +R$260");
+          updateUI();renderMissions();
+          setTimeout(()=>completeMission(2500),500);
+        },1800);
+      } else {
+        mlog("","");
+        mlog("erro: query não manipulada — payload inválido","err");
+        mlog("o servidor retornou: 'usuário ou senha incorretos'","err");
+        mlog("","");
+        setTimeout(()=>{mlog("tente novamente com um payload diferente","warn");mlog("");_step=0;document.getElementById("mprompt").textContent="campo (1-3): ";document.getElementById("minput-row").style.display="flex";document.getElementById("minput").focus();},800);
+      }
+    },1500);
+  }
+}
+
+// ---- DEFACEMENT ----
+function submitDefacement(){
+  const val=document.getElementById("minput").value.trim();
+  document.getElementById("minput").value="";
+
+  if(_step===0){
+    // usuário
+    mlog("usuário: "+val,"");
+    _user=val.toLowerCase();
+    document.getElementById("mprompt").textContent="senha: ";
+    document.getElementById("minput").type="password";
+    _step=1;
+  } else if(_step===1){
+    // senha
+    mlog("senha: ••••••••","");
+    const pass=val.toLowerCase();
+    document.getElementById("minput").type="text";
+    document.getElementById("minput-row").style.display="none";
+    setTimeout(()=>mlog("autenticando...","dim"),300);
+    setTimeout(()=>{
+      if((_user==="admin"&&(pass==="admin123"||pass==="admin"||pass==="123456"))||(_user==="administrator")){
+        mlog("","");mlog("acesso ao painel WordPress concedido.","ok");
+        mlog("","");
+        setTimeout(()=>{
+          mlog("PASSO 2/3 — editar página principal","");
+          mlog("  [1] substituir todo o conteúdo","dim");
+          mlog("  [2] adicionar banner no topo","dim");
+          mlog("  [3] redirecionar para outra página","dim");
+          mlog("","");
+          document.getElementById("mprompt").textContent="método (1-3): ";
+          document.getElementById("minput-row").style.display="flex";
+          document.getElementById("minput").focus();
+          _step=2;
+        },600);
+      } else {
+        mlog("","");mlog("acesso negado. credenciais incorretas.","err");
+        if(_user!=="admin")mlog("dica: tenta o usuário padrão do WordPress","warn");
+        else mlog("dica: senha padrão de instalação: admin123","warn");
+        mlog("");
+        setTimeout(()=>{_step=0;document.getElementById("mprompt").textContent="usuário: ";document.getElementById("minput-row").style.display="flex";document.getElementById("minput").focus();},800);
+      }
+    },900);
+  } else if(_step===2){
+    const METODOS={"1":"substituição completa","2":"banner no topo","3":"redirecionamento"};
+    if(!METODOS[val]){mlog("opção inválida.","err");return;}
+    mlog("método: "+METODOS[val],"");
+    mlog("","");
+    mlog("PASSO 3/3 — escreva a mensagem do defacement:","");
+    mlog("ex: 'Saudações de ghost_zero — segurança zero aqui'","dim");
+    mlog("","");
+    document.getElementById("mprompt").textContent="mensagem: ";
+    _step=3;
+  } else if(_step===3){
+    if(val.length<5){mlog("mensagem muito curta.","err");return;}
+    mlog("mensagem: \""+val+"\"","");
+    document.getElementById("minput-row").style.display="none";
+    setTimeout(()=>mlog("injetando conteúdo na página...","dim"),300);
+    setTimeout(()=>mlog("limpando cache do WordPress...","dim"),900);
+    setTimeout(()=>mlog("página atualizada em produção.","ok"),1500);
+    setTimeout(()=>{
+      mlog("","");
+      mlog(">>> DEFACEMENT PUBLICADO","ok");
+      mlog("prefeitura-mg.gov.br exibindo sua mensagem.","ok");
+      mlog("+60xp · rep +12 · +300 seguidores","ok");
+      const m=MISSIONS.find(x=>x.id==="defacement");
+      gainXP(m.xp);S.rep+=m.rep;S.heat=Math.min(100,S.heat+m.heat);
+      gainFollowers(300);
+      S.doneMissions.add("defacement");
+      addFeedItem("acabei de deixar minha marca em um site .gov.br. eles vão demorar pra perceber. 😈");
+      log("> defacement publicado em prefeitura .gov.br — +300 seguidores","ok");
+      toast("🖥️ Defacement no ar! +300 seguidores");
+      updateUI();renderMissions();
+      setTimeout(()=>completeMission(2500),500);
+    },2200);
+  }
+}
+
 // ---- OPERAÇÃO VERDADE — MISSÃO FINAL ----
 let _tvStep=0;
 
@@ -2361,12 +2791,12 @@ const AGENT_MESSAGES={
 };
 
 function getAgentLevel(){
-  // se risco muito baixo, agente perde o rastro temporariamente
   if(S.heat<20&&S.agent.level<=1) return 0;
-  if(S.rep>=60&&S.heat>=70) return 4;
-  if(S.rep>=35&&S.heat>=50) return 3;
-  if(S.rep>=15&&S.heat>=30) return 2;
-  if(S.rep>=8||S.heat>=20)  return 1;
+  const sb=S._spyware?1:0; // spyware acelera investigação
+  if(S.rep>=60&&S.heat>=70-sb*15) return 4;
+  if(S.rep>=35&&S.heat>=50-sb*10) return 3;
+  if(S.rep>=15&&S.heat>=30-sb*8)  return 2;
+  if(S.rep>=8||S.heat>=20)        return 1;
   return 0;
 }
 
@@ -2457,12 +2887,30 @@ function initGame(){
   },9000);
   setInterval(checkVoidInvite,10000);
   setInterval(checkAgent,15000);
-  setInterval(saveGame,30000); // salva a cada 30 segundos
+  setInterval(saveGame,30000);
+  // eventos globais — dispara entre 3 e 5 minutos
+  const scheduleEvent=()=>{
+    const delay=180000+Math.random()*120000;
+    setTimeout(()=>{triggerGlobalEvent();scheduleEvent();},delay);
+  };
+  setTimeout(scheduleEvent,120000); // primeiro evento após 2 minutos
+  // spyware — chance de instalar se vulnerável, checagem de detecção
+  setInterval(()=>{
+    checkSpywareVulnerability();
+    checkSpywareDetection();
+    if(S.heat>65&&S.defense<25&&!S._spyware&&!S.owned.has("firewall")&&Math.random()<0.06){
+      installSpyware();
+    }
+  },20000); // salva a cada 30 segundos
 }
 
 // INIT
 runIntro();
 </script>
+
+<div style="text-align:center;padding:16px 0 8px;font-size:10px;color:#30363d;font-family:monospace">
+  <a href="/changelog.html" style="color:#30363d;text-decoration:none" onmouseover="this.style.color='#58a6ff'" onmouseout="this.style.color='#30363d'">v0.1.16 — ver changelog</a>
+</div>
 
 </body>
 </html>

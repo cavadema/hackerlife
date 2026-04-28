@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Changelog — Simulador de Hacker</title>
+<meta name="description" content="Histórico de versões e atualizações do Simulador de Hacker — veja o que foi adicionado em cada versão.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:monospace;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:24px 16px}
+#app{max-width:680px;margin:0 auto}
+.header{margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid #21262d}
+.logo{font-size:20px;font-weight:700;color:#7ee787;letter-spacing:0.08em}
+.logo span{color:#a371f7}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:#58a6ff;font-size:11px;text-decoration:none;margin-top:10px;transition:color 0.15s}
+.back-link:hover{color:#79c0ff}
+h1{font-size:15px;font-weight:700;color:#e6edf3;margin-top:24px;margin-bottom:4px}
+.subtitle{font-size:11px;color:#484f58;margin-bottom:28px}
+.version-block{margin-bottom:32px}
+.version-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.version-tag{font-size:13px;font-weight:700;color:#e6edf3;background:#161b22;border:1px solid #30363d;border-radius:6px;padding:4px 10px}
+.version-tag.latest{border-color:#238636;color:#3fb950}
+.version-date{font-size:10px;color:#484f58}
+.badge-new{background:#0f2c0f;color:#3fb950;border:1px solid #238636;border-radius:4px;font-size:9px;font-weight:700;padding:2px 6px}
+.badge-fix{background:#1a1a0d;color:#e3b341;border:1px solid #5a4a00;border-radius:4px;font-size:9px;font-weight:700;padding:2px 6px}
+.badge-improvement{background:#0d1a2e;color:#58a6ff;border:1px solid #1a3a5e;border-radius:4px;font-size:9px;font-weight:700;padding:2px 6px}
+.change-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.change-item{display:flex;align-items:flex-start;gap:8px;font-size:11px;line-height:1.6;padding:6px 10px;background:#161b22;border-radius:6px;border-left:2px solid #30363d}
+.change-item.new{border-left-color:#238636}
+.change-item.fix{border-left-color:#e3b341}
+.change-item.improvement{border-left-color:#58a6ff}
+.change-text{color:#c9d1d9}
+.change-text strong{color:#e6edf3}
+.divider{border:none;border-top:1px solid #21262d;margin:8px 0 24px}
+.footer{margin-top:40px;padding-top:16px;border-top:1px solid #21262d;font-size:10px;color:#484f58;text-align:center}
+.footer a{color:#484f58;text-decoration:none}
+.footer a:hover{color:#58a6ff}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="header">
+    <div class="logo">HACKER<span>LIFE</span></div>
+    <a class="back-link" href="/jogar.html">← voltar ao jogo</a>
+  </div>
+
+  <h1>Changelog</h1>
+  <div class="subtitle">histórico de versões e atualizações do simuladordehacker.com.br</div>
+
+  <!-- v0.1.16 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag latest">v0.1.16</span>
+      <span class="version-date">27 Abr 2025</span>
+      <span class="badge-new">LATEST</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Defacement do blog</strong> — evento surpresa onde outro hacker derruba seu blog, pausando a renda passiva por 2 minutos</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>WAF — Web Application Firewall</strong> — novo item na loja (defesa, R$100) que protege o blog de ataques. Com WAF, tentativas são bloqueadas e logadas</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Status do blog</strong> — painel mostra "⚠️ fora do ar — sob ataque" em vermelho quando derrubado</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Renda do blog</strong> — agora também recebe bônus de eventos globais positivos</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.15 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.15</span>
+      <span class="version-date">27 Abr 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Eventos globais</strong> — manchetes no feed de notícias que afetam o jogo a cada 3-5 minutos</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Eventos positivos</strong> — falha crítica exposta (+40% lucro), instabilidade de operadora (usos dobram), crypto em alta (doações +100%)</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Eventos negativos</strong> — operação da PF (Salles sobe nível), Banco Central em alerta (Blackout -50%), bloqueio de tráfego (cooldowns dobram)</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Eventos narrativos</strong> — r0drig0 contratado pela Vortex Corp, 0xVoid nas notícias globais avançam a história</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Feed de notícias</strong> — eventos aparecem no topo com borda verde e badge colorido. Aba pisca ao chegar notícia</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.14 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.14</span>
+      <span class="version-date">27 Abr 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Indicador de vulnerabilidade</strong> — banner amarelo ⚠️ aparece quando risco alto + defesa baixa, com mensagem direcionando a ação correta</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Hierarquia de alertas</strong> — alerta vermelho (invasão, polícia) tem prioridade e esconde o amarelo. Ao fechar o vermelho, amarelo volta se ainda vulnerável</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Mensagens contextuais</strong> — indicador diferencia spyware ativo, backdoor instalado e vulnerabilidade geral, cada um com instrução específica</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.13 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.13</span>
+      <span class="version-date">27 Abr 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Spyware silencioso</strong> — malware instalado sem aviso quando defesa está baixa. Drena R$8-15 a cada 2 minutos passivamente</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Sintomas sutis</strong> — logs vagos no terminal ("processo desconhecido", "conexão de saída") indicam infecção para quem presta atenção</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Agente Salles acelera</strong> — com spyware ativo, investigador sobe de nível com limiares menores</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Pista do Kr4ck3r_BR</strong> — SMS de aviso quando vulnerável há tempo: "isso atrai gente indesejada. não só a polícia."</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>IDS/IPS</strong> — agora detecta e remove spyware além do backdoor, mostrando total drenado</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Changelog</strong> — esta página! histórico público de versões em simuladordehacker.com.br/changelog</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.12 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.12</span>
+      <span class="version-date">Jan 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Cards compactos</strong> — hacks e missões travadas/concluídas aparecem em linha compacta, reduzindo poluição visual</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>SQL Injection manual</strong> — missão interativa onde você digita o payload no terminal (nível 2)</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Defacement comemorativo</strong> — invadir site de prefeitura via WordPress e deixar mensagem (nível 3)</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>FTP e DDoS</strong> — dois novos hacks desbloqueados no nível 2</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Ordenação inteligente</strong> — disponíveis primeiro, travados depois, ordenados por nível em ambos os painéis</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Progressão de missões</strong> — cada missão especial agora tem nível mínimo definido (1→2→3→4→5→endgame)</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.11 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.11</span>
+      <span class="version-date">Jan 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Upgrades conectados ao gameplay</strong> — RAM desbloqueia câmeras, GPU desbloqueia cryptojacking, Antena desbloqueia interceptação de rede</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>VPN reduz Agente Salles</strong> — comprar VPN faz o investigador perder o rastro temporariamente</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Servidor VPS necessário para Phantom Syndicate</strong> — requisito narrativo para entrar no grupo intermediário</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Degradação de hacks</strong> — lucro decrescente por uso no ciclo + risco extra por sequência do mesmo hack</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.10 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.10</span>
+      <span class="version-date">Jan 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Save automático</strong> — progresso salvo no navegador a cada 30s e após ações importantes. Carregado automaticamente ao voltar</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Botão reset</strong> — opção discreta para recomeçar do zero com confirmação</span></li>
+      <li class="change-item fix"><span class="badge-fix">FIX</span><span class="change-text"><strong>XP não subia</strong> — corrigido bug onde S.xp+=n estava faltando na função gainXP</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.9 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.9</span>
+      <span class="version-date">Jan 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Objetivos progressivos</strong> — painel verde com próximo objetivo sempre visível, guiando o jogador passo a passo</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Objetivo dinâmico de risco</strong> — aviso em amarelo quando risco > 30%, some automaticamente ao baixar</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Reordenação dos painéis</strong> — hacking e delivery no topo, itens menos usados no final</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Travamento por tipo</strong> — iniciar hack trava outros hacks; delivery trava outros deliveries</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.8 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.8</span>
+      <span class="version-date">Jan 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Agente Vitor Salles</strong> — investigador da CGCIBER que escala progressivamente em 4 níveis conforme rep e risco sobem</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>SMS do Kr4ck3r_BR</strong> — dica de sobrevivência chega logo após o primeiro alerta do agente</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Oferta de acordo</strong> — no nível 3, Salles oferece imunidade em troca de informações sobre r0drig0</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.7 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.7</span>
+      <span class="version-date">Jan 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Arco 0xVoid + Operação Verdade</strong> — missão final em 3 atos revelando a conspiração da TechNova com 3 finais diferentes</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Notícias TechNova/Vortex Corp</strong> — manchetes no feed semeiam a conspiração desde o início</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Email revelador do 0xVoid</strong> — ao entrar no grupo, revelação de que a demissão foi encomendada pela diretoria</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.6 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.6</span>
+      <span class="version-date">Jan 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Invasão dramática com terminal</strong> — evento surpresa quando defesa é baixa, com 3 escolhas: desconectar, rastrear ou ignorar</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Backdoor</strong> — ignorar invasão instala backdoor que aumenta risco a cada hack. Removido comprando IDS/IPS</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Intro cinematográfica</strong> — tela preta com história de origem digitada linha por linha antes do jogo começar</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Intro atualizada</strong> — adicionado trecho explicando a vida de entregador após a demissão</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.5 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.5</span>
+      <span class="version-date">Jan 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Grupos hackers</strong> — NullByte Crew, Phantom Syndicate e 0xVoid com requisitos e missões exclusivas</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Aba de notícias no celular</strong> — manchetes dos grupos e do Agente Salles aparecem no feed</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Convite misterioso do 0xVoid</strong> — email de 0x000@void.onion quando requisitos são atingidos</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.4 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.4</span>
+      <span class="version-date">Jan 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Rede social x_hacker</strong> — perfil anônimo com seguidores, doações e feed de posts</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Posts sobre hacks</strong> — cada hack gera seguidores e desbloqueia botão de postar</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Blog técnico</strong> — criar blog, escrever posts e divulgar gera renda passiva com anúncios</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Cursos técnicos reais</strong> — Linux Essentials, CEH, CompTIA Security+, OSWP e outros com efeitos permanentes</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Freelance</strong> — corrigir site, configurar firewall e pentest autorizado com bônus de gratidão</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.3 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.3</span>
+      <span class="version-date">Dez 2024</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Sistema de defesa</strong> — nova stat com barra, afeta chance de rastreio e eventos negativos</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Eventos negativos</strong> — sinal rastreado, polícia na área e contra-hack baseados em defesa vs risco</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Loja com abas</strong> — separada em ataque, defesa e delivery</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Scanner de e-mail e Antivírus</strong> — proteção contra phishing com mecânicas distintas</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.2 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.2</span>
+      <span class="version-date">Dez 2024</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Celular com e-mail e SMS</strong> — inbox com phishing real, missões por e-mail e SMS narrativos</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Phishing recebido</strong> — e-mails falsos de Bradesco e MercadoLivre que roubam grana se clicados</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Missões por e-mail</strong> — propostas chegam no celular com recompensa ao aceitar</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Missão: Armadilha GPS</strong> — isca digital com rastreador para colaboração policial</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Operação Blackout</strong> — hackear o Banco Central com decisão sob pressão (fugir ou apagar rastros)</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.1 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.1</span>
+      <span class="version-date">Dez 2024</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Missão interativa: Linux novato</strong> — terminal real onde você digita usuário e senha</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Missão: Crypto Airdrop</strong> — phishing de projeto crypto em 3 passos interativos</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Usos limitados por hack</strong> — cada hack tem número fixo de usos antes de esgotar alvos</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Reset de alvos</strong> — após esgotar, novos alvos aparecem com timer. Hacks repetidos degradam lucro</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.0 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.0</span>
+      <span class="version-date">Dez 2024</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Lançamento inicial</strong> — primeira versão jogável no ar em simuladordehacker.com.br</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Sistema base</strong> — hacking, delivery, upgrades, nível, XP, reputação e risco</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Terminal narrativo</strong> — log de ações em tempo real</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Landing page</strong> — página inicial com SEO para "simulador de hacker"</span></li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <a href="/jogar.html">← voltar ao jogo</a> · simuladordehacker.com.br · feito com 🖤
+  </div>
+
+</div>
+</body>
+</html>
