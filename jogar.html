@@ -249,7 +249,7 @@ h1 span{color:#484f58;font-size:11px;font-weight:400;display:block;margin-top:2p
   <div class="stats-grid">
     <div class="stat"><div class="stat-val money" id="money">R$0</div><div class="stat-label">💰 grana</div></div>
     <div class="stat"><div class="stat-val purple" id="power">1x</div><div class="stat-label">⚡ poder</div></div>
-    <div class="stat"><div class="stat-val orange" id="rep">0</div><div class="stat-label">💀 rep</div></div>
+    <div class="stat"><div class="stat-val orange" id="rep">0</div><div class="stat-label">💀 rep · <span id="rep-tier" style="font-size:8px">Desconhecido</span></div></div>
   </div>
   <div class="stats-grid-2" style="margin-top:7px">
     <div class="stat"><div class="stat-val blue" id="defense">0%</div><div class="stat-label">🛡️ defesa</div></div>
@@ -296,6 +296,7 @@ h1 span{color:#484f58;font-size:11px;font-weight:400;display:block;margin-top:2p
     <div class="tab active" onclick="setShopTab('atk',this)">⚡ ataque</div>
     <div class="tab" onclick="setShopTab('def',this)">🛡️ defesa</div>
     <div class="tab" onclick="setShopTab('del',this)">🛵 delivery</div>
+    <div class="tab" onclick="setShopTab('cons',this)">⚡ boost</div>
   </div>
   <div class="shop-grid" id="shop"></div>
 </div>
@@ -514,6 +515,7 @@ const OBJECTIVES=[
   {id:"earn_100",        text:"Junte R$50",                             sub:"faça hacks e deliveries para acumular grana",                    check:()=>S._totalEarned>=50},
   {id:"buy_firewall",    text:"Compre um Firewall básico",              sub:"upgrades → defesa → R$50 — protege de invasões",                check:()=>S.owned.has("firewall")},
   {id:"linux_mission",   text:"Complete a missão do servidor Linux",    sub:"missões especiais → 'Invadir servidor Linux novato'",            check:()=>S.doneMissions.has("linux_noob")},
+  {id:"first_post",      text:"Faça seu primeiro post na rede social",  sub:"x_hacker → 'Postar tutorial' — ganhe seus primeiros seguidores", check:()=>S.social.posts>0},
   {id:"buy_upgrade",     text:"Compre um upgrade de ataque",            sub:"upgrades → ataque → RAM 16GB ou GPU",                           check:()=>S.owned.has("ram")||S.owned.has("gpu")||S.owned.has("server")},
   {id:"earn_200",        text:"Junte R$200",                            sub:"diversifique — hacks, delivery e freelance",                     check:()=>S._totalEarned>=200},
   {id:"do_course",       text:"Faça um curso técnico",                  sub:"cursos técnicos → Linux Essentials (R$40)",                     check:()=>Object.values(S.courses).includes("done")},
@@ -601,6 +603,48 @@ function gainXP(n){
 }
 function getUses(id,max){if(S.uses[id]===undefined)S.uses[id]=max;return S.uses[id];}
 
+// ---- SISTEMA DE REPUTAÇÃO ----
+function getRepTier(){
+  if(S.rep>=81) return{name:"Lendário",color:"#a371f7",tier:4};
+  if(S.rep>=51) return{name:"Respeitado",color:"#58a6ff",tier:3};
+  if(S.rep>=21) return{name:"Conhecido",color:"#e3b341",tier:2};
+  return{name:"Desconhecido",color:"#484f58",tier:1};
+}
+
+function loseRep(amount, reason){
+  const before=getRepTier();
+  S.rep=Math.max(0,S.rep-amount);
+  const after=getRepTier();
+  log("> reputação -"+amount+" ("+reason+")","warn");
+  if(after.tier<before.tier){
+    log("> [REP] rebaixado para: "+after.name,"err");
+    toast("📉 Rep caiu! Agora: "+after.name);
+  }
+  updateUI();
+}
+
+function checkRepEffects(){
+  const tier=getRepTier();
+  // tier 4 — lendário: doações maiores
+  if(tier.tier>=4&&!S._repLegendaryApplied){
+    S._repLegendaryApplied=true;
+    S._donationMult=(S._donationMult||1)*1.5;
+    log("> [REP] lendário — doações aumentadas automaticamente","ok");
+    // notícia sobre você
+    NEWS_ITEMS.unshift({src:"The Hacker News",grp:"ghost_zero",gcls:"",
+      style:"background:#1f1635;color:#a371f7",
+      h:"Hacker misterioso 'ghost_zero' ganha reputação de lenda no submundo digital",
+      t:"agora",isEvent:true});
+  }
+  // tier 3 — respeitado: ataques aleatórios reduzem
+  S._repProtected=tier.tier>=3;
+  // atualizar badge de rep com cor e título
+  const repEl=document.getElementById("rep");
+  const repTierEl=document.getElementById("rep-tier");
+  if(repEl){repEl.style.color=tier.color;}
+  if(repTierEl){repTierEl.textContent=tier.name;repTierEl.style.color=tier.color;}
+}
+
 function updateUI(){
   document.getElementById("money").textContent="R$"+S.money;
   document.getElementById("power").textContent=S.power+"x";
@@ -618,8 +662,10 @@ function updateUI(){
   const tc=traceChance();
   document.getElementById("trace-chance").textContent=tc+"%";
   document.getElementById("trace-chance").style.color=tc>70?"#f85149":tc>30?"#e3b341":"#3fb950";
+  checkRepEffects();
   renderHacks();renderMissions();renderFreelance();renderBlog();renderCourses();renderDelivery();renderShop();updateSocial();renderGroups();renderObjectives();
   updateVulnIndicator();
+  checkRiskOverflow();
 }
 
 // INBOX
@@ -823,6 +869,8 @@ function renderHacks(){
 function doHack(a){
   if(S.cds[a.id])return;
   if(S.heat>=90){toast("🚨 Risco demais! Faça deliveries.");return;}
+  // modo foragido — hacks bloqueados temporariamente
+  if(S._fugitivo){toast("🚔 Modo foragido ativo — aguarde ou faça deliveries.");return;}
   const u=getUses(a.id,a.max);if(u<=0){toast("Alvo esgotado!");return;}
 
   const {cycles,earningMult,heatMult}=hackDegradation(a.id);
@@ -882,7 +930,160 @@ function rollEvent(){
   else triggerTrace();
 }
 function triggerTrace(){showAlert("📡 SINAL RASTREADO","Risco +10%. Melhore sua defesa!");S.heat=Math.min(100,S.heat+10);log("> sinal rastreado","warn");updateUI();}
-function triggerPolice(){showAlert("🚔 POLÍCIA NA ÁREA","Risco +20%! Fique offline!");S.heat=Math.min(100,S.heat+20);log("> [!!!] alerta policial","err");toast("🚔 Polícia! Faça deliveries!");updateUI();}
+function triggerPolice(){showAlert("🚔 POLÍCIA NA ÁREA","Risco +20%! Fique offline!");S.heat=Math.min(100,S.heat+20);log("> [!!!] alerta policial","err");toast("🚔 Polícia! Faça deliveries!");
+  // verificar se atingiu 100%
+  if(S.heat>=100) triggerPolicialOperation();
+  else updateUI();
+}
+
+// ---- OPERAÇÃO POLICIAL — RISCO 100% ----
+let _operationActive=false;
+
+function checkRiskOverflow(){
+  if(S.heat>=100&&!_operationActive&&!S._fugitivo){
+    triggerPolicialOperation();
+  }
+  // avisos progressivos
+  if(S.heat>=95&&!S._warnedSalles95){
+    S._warnedSalles95=true;
+    log("> [SALLES] tráfego suspeito rastreado até sua conexão","err");
+    log("> [SALLES] mandado judicial solicitado ao juiz","err");
+    setTimeout(()=>addSMS({from:"Kr4ck3r_BR",text:"some agora. tô falando sério. o Salles tá com mandado. você tem poucos minutos.",isMe:false}),2000);
+  }
+  if(S.heat>=90&&!S._warnedSalles90){
+    S._warnedSalles90=true;
+    log("> [!] risco crítico — Salles se aproximando","warn");
+    toast("⚠️ Risco crítico! Faça deliveries agora!");
+  }
+}
+
+function triggerPolicialOperation(){
+  if(_operationActive)return;
+  _operationActive=true;
+
+  // abrir modal com operação em tempo real
+  document.getElementById("mterm").innerHTML="";
+  document.getElementById("modal-title").textContent="🚨 OPERAÇÃO POLICIAL";
+  document.getElementById("minput-row").style.display="none";
+  document.getElementById("modal-bg").classList.add("open");
+  _mission="__operation__";
+
+  const iml=(m,c,d)=>setTimeout(()=>mlog(m,c),d);
+
+  iml("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓","err",0);
+  iml("   CGCIBER — OPERAÇÃO EM ANDAMENTO  ","err",300);
+  iml("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓","err",600);
+  iml("","",900);
+  iml("Ag. Salles: mandado cumprido.","warn",1200);
+  iml("Equipe tática mobilizada para seu endereço.","warn",1800);
+  iml("Estimativa de chegada: 4 minutos.","warn",2400);
+  iml("","",3000);
+  iml("você tem UMA chance de agir:","",3200);
+  iml("","",3600);
+  iml("  [1] FUGIR — desligar tudo e sumir agora","dim",3800);
+  iml("      perde 30% da grana + upgrades de ataque","dim",4100);
+  iml("      mas mantém liberdade. risco volta a zero.","dim",4400);
+  iml("","",4700);
+  iml("  [2] NÃO AGIR — ficar e ver o que acontece","dim",4900);
+  iml("      perde 50% da grana + upgrades","dim",5200);
+  iml("      entra em modo foragido por 5 minutos","dim",5500);
+  iml("","",5800);
+
+  // countdown de 60 segundos para decidir
+  let secs=60;
+  const countdown=setInterval(()=>{
+    secs--;
+    if(secs===45) mlog("⏱ 45 segundos para decidir...","warn");
+    if(secs===20) mlog("⏱ 20 SEGUNDOS! DECIDA AGORA!","err");
+    if(secs<=0){
+      clearInterval(countdown);
+      if(_operationActive) submitOperation("2"); // não agiu = capturado
+    }
+  },1000);
+
+  setTimeout(()=>{
+    document.getElementById("mprompt").textContent="decisão (1 ou 2): ";
+    document.getElementById("minput").value="";
+    document.getElementById("minput-row").style.display="flex";
+    document.getElementById("minput").focus();
+    S._operationCountdown=countdown;
+  },6200);
+}
+
+function submitOperation(val){
+  if(!val) val=document.getElementById("minput").value.trim();
+  if(val!=="1"&&val!=="2"){ mlog("digite 1 ou 2.","err"); document.getElementById("minput").value=""; return; }
+  clearInterval(S._operationCountdown);
+  document.getElementById("minput-row").style.display="none";
+  _operationActive=false;
+  _mission=null;
+
+  if(val==="1"){
+    // FUGIR
+    mlog("",""); mlog("decisão: FUGIR","warn");
+    setTimeout(()=>mlog("desligando dispositivos...","dim"),400);
+    setTimeout(()=>mlog("destruindo sessão...","dim"),900);
+    setTimeout(()=>mlog("saindo...","warn"),1400);
+    setTimeout(()=>{
+      // perder 30% da grana e upgrades de ataque
+      const lostMoney=Math.round(S.money*0.3);
+      S.money=Math.max(0,S.money-lostMoney);
+      ["ram","gpu","server","antena"].forEach(id=>{
+        if(S.owned.has(id)){S.owned.delete(id);log("> perdeu upgrade: "+id+" (apreendido)","err");}
+      });
+      S.heat=0;
+      S._warnedSalles90=false; S._warnedSalles95=false;
+      loseRep(20,"operação policial — fugiu");
+      mlog("",""); mlog(">>> VOCÊ CONSEGUIU FUGIR","ok");
+      mlog("policiais chegaram. encontraram apartamento vazio.","dim");
+      mlog("caso suspenso por falta de provas.","ok");
+      mlog("","");
+      mlog("custo: -R$"+lostMoney+" · upgrades de ataque perdidos","warn");
+      mlog("risco zerado · liberdade mantida","ok");
+      log("> fugiu da operação. perdeu R$"+lostMoney+" e upgrades de ataque.","warn");
+      toast("🏃 Fugiu! Risco zerado. Rebuilde!");
+      updateUI();
+      setTimeout(()=>document.getElementById("modal-bg").classList.remove("open"),3500);
+    },2200);
+
+  } else {
+    // NÃO AGIU — CAPTURADO PARCIALMENTE
+    mlog("",""); mlog("você não agiu a tempo.","err");
+    setTimeout(()=>mlog("policiais entraram no apartamento.","err"),600);
+    setTimeout(()=>mlog("equipamentos apreendidos.","err"),1200);
+    setTimeout(()=>mlog("levado para depoimento...","err"),1800);
+    setTimeout(()=>{
+      const lostMoney=Math.round(S.money*0.5);
+      S.money=Math.max(0,S.money-lostMoney);
+      ["ram","gpu","server","antena","firewall","vpn"].forEach(id=>{
+        if(S.owned.has(id)){S.owned.delete(id);}
+      });
+      S.heat=20; // não volta a zero — ainda investigado
+      S._warnedSalles90=false; S._warnedSalles95=false;
+      loseRep(30,"capturado pela polícia");
+
+      // modo foragido por 5 minutos
+      S._fugitivo=true;
+      S.power=Math.max(1,+(S.power*0.5).toFixed(1)); // poder reduzido
+      mlog("",""); mlog(">>> MODO FORAGIDO ATIVADO — 5 minutos","err");
+      mlog("hacks rendem 50% menos. Salles ainda te rastreia.","warn");
+      mlog("custo: -R$"+lostMoney+" · upgrades perdidos","err");
+      log("> capturado parcialmente. modo foragido por 5min.","err");
+      toast("🚔 Modo foragido! 5min de penalidade.");
+
+      // remover modo foragido após 5 minutos
+      setTimeout(()=>{
+        S._fugitivo=false;
+        log("> modo foragido encerrado. reconstrua sua base.","ok");
+        toast("✅ Foragido encerrado. Recomece!");
+        updateUI();
+      },300000);
+
+      updateUI();
+      setTimeout(()=>document.getElementById("modal-bg").classList.remove("open"),4000);
+    },2600);
+  }
+}
 function triggerCounterHack(){const lost=Math.min(S.money,Math.round(S.money*0.15+20));S.money=Math.max(0,S.money-lost);showAlert("💥 CONTRA-HACK!","Perdeu R$"+lost+". Instale um firewall!");log("> contra-hack — perdeu R$"+lost,"err");toast("💥 Contra-hack! -R$"+lost);updateUI();}
 
 // ---- INVASÃO COM TERMINAL ----
@@ -1059,6 +1260,78 @@ function checkBackdoorRemoval(){
   }
 }
 
+// ---- ATAQUE ALEATÓRIO INDEPENDENTE ----
+// Acontece a cada 8-12 minutos independente de defesa/risco
+// A defesa muda apenas a CONSEQUÊNCIA, não a ocorrência
+
+const RANDOM_ATTACKS=[
+  {id:"steal",    label:"Roubo de carteira",
+   effect:(hasFirewall,hasIDS,hasProxy)=>{
+     if(hasProxy){ log("> tentativa de acesso à carteira bloqueada pelo ProxyChains","ok"); toast("🌐 ProxyChains bloqueou ataque!"); return; }
+     if(hasFirewall){ log("> tentativa de roubo detectada e bloqueada pelo Firewall","ok"); toast("🧱 Firewall bloqueou ataque!"); return; }
+     const lost=Math.min(S.money,Math.round(S.money*0.1+15));
+     S.money=Math.max(0,S.money-lost);
+     showAlert("💸 CARTEIRA ACESSADA","Hacker acessou sua carteira e transferiu R$"+lost+". Instale ProxyChains para se proteger.");
+     log("> [ATAQUE] carteira acessada — perdeu R$"+lost,"err");
+     toast("💸 Ataque! -R$"+lost);
+     updateUI();
+   }},
+  {id:"cdblock",  label:"Bloqueio de conexão",
+   effect:(hasFirewall,hasIDS,hasProxy)=>{
+     if(hasIDS){ log("> ataque DDoS na sua conexão detectado e mitigado pelo IDS","ok"); toast("👁️ IDS mitigou ataque DDoS!"); return; }
+     if(hasFirewall){ log("> tentativa de bloqueio parcialmente mitigada pelo Firewall","ok"); S.cds["__hackbusy"]=true; setTimeout(()=>delete S.cds["__hackbusy"],90000); log("> hacks travados por 90s (dano parcial)","warn"); return; }
+     // sem defesa — bloqueia hacks por 3 minutos
+     S.cds["__hackbusy"]=true;
+     setTimeout(()=>{delete S.cds["__hackbusy"];renderHacks();log("> conexão restaurada","ok");},180000);
+     showAlert("📡 CONEXÃO DERRUBADA","Atacante derrubou sua conexão. Hacks bloqueados por 3 minutos. IDS/IPS previne isso.");
+     log("> [ATAQUE] conexão derrubada — hacks bloqueados por 3min","err");
+     toast("📡 Conexão derrubada! 3min sem hacks.");
+     renderHacks();
+   }},
+  {id:"riskdump", label:"Vazamento de dados",
+   effect:(hasFirewall,hasIDS,hasProxy)=>{
+     if(hasProxy&&hasFirewall){ log("> tentativa de dump bloqueada por ProxyChains + Firewall","ok"); toast("🔒 Ataque bloqueado!"); return; }
+     const heatAdd=hasFirewall?8:15;
+     S.heat=Math.min(100,S.heat+heatAdd);
+     showAlert("📤 DADOS VAZADOS","Seus logs foram expostos. Risco +"+heatAdd+"%. VPN + Firewall reduzem o dano.");
+     log("> [ATAQUE] logs vazados — risco +"+heatAdd+"%","err");
+     toast("📤 Dados vazados! Risco +"+heatAdd+"%");
+     updateUI();
+   }},
+  {id:"backdoor_try", label:"Tentativa de backdoor",
+   effect:(hasFirewall,hasIDS,hasProxy)=>{
+     if(hasIDS){ log("> tentativa de instalação de backdoor bloqueada pelo IDS","ok"); toast("👁️ IDS bloqueou backdoor!"); return; }
+     if(hasFirewall){ log("> tentativa de backdoor detectada pelo Firewall — bloqueada","ok"); toast("🧱 Firewall bloqueou backdoor!"); return; }
+     if(!S._backdoor){ S._backdoor=true; showAlert("💀 BACKDOOR INSTALADO","Atacante instalou backdoor no sistema. Cada hack aumenta risco +2%. Compre IDS/IPS para remover."); log("> [ATAQUE] backdoor instalado por atacante externo","err"); toast("💀 Backdoor instalado!"); }
+     else { log("> tentativa de segundo backdoor — sistema já comprometido","warn"); }
+   }}
+];
+
+let _randomAttackTimer=null;
+
+function scheduleRandomAttack(){
+  const delay=480000+Math.random()*240000; // 8-12 minutos
+  _randomAttackTimer=setTimeout(()=>{
+    triggerRandomAttack();
+    scheduleRandomAttack(); // agenda próximo
+  },delay);
+}
+
+function triggerRandomAttack(){
+  // rep alta protege de ataques aleatórios
+  if(S._repProtected&&Math.random()<0.6){
+    log("> tentativa de ataque ignorada — sua reputação intimida","dim");
+    return;
+  }
+  const hasFirewall=S.owned.has("firewall");
+  const hasIDS=S.owned.has("ids");
+  const hasProxy=S.owned.has("proxychains");
+  const attack=RANDOM_ATTACKS[Math.floor(Math.random()*RANDOM_ATTACKS.length)];
+  log("> [!!!] tentativa de ataque detectada: "+attack.label,"warn");
+  attack.effect(hasFirewall,hasIDS,hasProxy);
+  updateUI();
+}
+
 // ---- DEFACEMENT DO BLOG ----
 let _blogDefaceInterval=null;
 
@@ -1203,7 +1476,7 @@ function gainFollowers(n){
   S.social.followers+=n;
   // chance de doação proporcional aos seguidores
   if(S.social.followers>20&&Math.random()<0.15){
-    const donation=Math.round(5+Math.random()*S.social.followers*0.02);
+    const donation=Math.round((5+Math.random()*S.social.followers*0.02)*(S._donationMult||1)*(S._eventDonationBonus||1));
     S.money+=donation;S.social.donations+=donation;
     addFeedItem("alguém doou R$"+donation+" via PIX anônimo! 🙏",true);
     toast("💸 Doação! +R$"+donation);
@@ -1475,6 +1748,19 @@ const SHOP={
   del:[
     {id:"moto_prop",n:"Moto própria",icon:"🏍️",p:130,bonus:"delivery +50%",effect:()=>{}},
     {id:"ifood_pro",n:"iFood Pro",icon:"📱",p:70,bonus:"delivery +30%",effect:()=>{}},
+  ],
+  cons:[
+    {id:"xp_small",  n:"Boost XP pequeno", icon:"🚀",p:30, bonus:"+50 XP imediato",      consumable:true, effect:()=>{gainXP(50); log("> boost XP: +50 XP","ok"); toast("🚀 +50 XP!");}},
+    {id:"xp_large",  n:"Boost XP grande",  icon:"🚀",p:80, bonus:"+150 XP imediato",     consumable:true, effect:()=>{gainXP(150);log("> boost XP: +150 XP","ok");toast("🚀 +150 XP!");}},
+    {id:"clean_trail",n:"Limpar rastros",  icon:"🧹",p:40, bonus:"risco -20% imediato",  consumable:true, effect:()=>{S.heat=Math.max(0,S.heat-20);log("> rastros limpos — risco -20%","ok");toast("🧹 Risco -20%!");}},
+    {id:"ip_change", n:"Trocar IP",        icon:"🌐",p:60, bonus:"risco -35% · Salles para 1min", consumable:true, effect:()=>{
+      S.heat=Math.max(0,S.heat-35);
+      S._agentPaused=true;
+      log("> IP trocado — risco -35% · Salles perdeu o rastro por 1 minuto","ok");
+      toast("🌐 IP trocado! Salles pausado.");
+      setTimeout(()=>{S._agentPaused=false;log("> Salles retomou rastreio","warn");},60000);
+    }},
+    {id:"offline",   n:"Modo offline",     icon:"🔐",p:80, bonus:"risco -50% imediato",  consumable:true, effect:()=>{S.heat=Math.max(0,S.heat-50);log("> modo offline ativado — risco -50%","ok");toast("🔐 Risco -50%!");}},
   ]
 };
 
@@ -1482,6 +1768,16 @@ function setShopTab(tab,el){S.shopTab=tab;document.querySelectorAll(".tab").forE
 function renderShop(){
   const c=document.getElementById("shop");c.innerHTML="";
   for(const item of (SHOP[S.shopTab]||[])){
+    // consumíveis — sempre disponíveis, nunca "owned"
+    if(item.consumable){
+      const cantAfford=S.money<item.p;
+      const el=document.createElement("div");
+      el.className="shop-item"+(cantAfford?" cant-afford":"");
+      el.innerHTML=`<div class="item-icon">${item.icon}</div><div class="item-name">${item.n}</div><div class="item-price">R$${item.p}</div><div class="item-bonus">${item.bonus}</div>`;
+      if(!cantAfford)el.onclick=()=>{S.money-=item.p;S._totalEarned=(S._totalEarned||0);item.effect();updateUI();saveGame();};
+      c.appendChild(el);
+      continue;
+    }
     const owned=S.owned.has(item.id),cantAfford=!owned&&S.money<item.p;
     const el=document.createElement("div");el.className="shop-item"+(owned?" owned":"")+(cantAfford?" cant-afford":"");
     el.innerHTML=`<div class="item-icon">${item.icon}</div><div class="item-name">${item.n}</div><div class="item-price">${owned?"✓ instalado":"R$"+item.p}</div><div class="item-bonus">${item.bonus}</div>`;
@@ -1586,6 +1882,7 @@ function submitMission(){
   if(!_mission)return;
   const val=document.getElementById("minput").value.trim();if(!val)return;
   if(_mission==="__invasion__"){submitInvasionReaction();return;}
+  if(_mission==="__operation__"){submitOperation(document.getElementById("minput").value.trim());return;}
   if(_mission==="vx_technova"){submitTechNova();return;}
   if(_mission==="sqli"){submitSQLI();return;}
   if(_mission==="defacement"){submitDefacement();return;}
@@ -2851,7 +3148,7 @@ function agentLog(lvl){
 }
 
 // checar agente a cada hack e periodicamente
-function checkAgent(){updateAgentNews();}
+function checkAgent(){if(!S._agentPaused)updateAgentNews();}
 
 function playNow(){
   document.getElementById("landing").style.display="none";
@@ -2888,6 +3185,7 @@ function initGame(){
   setInterval(checkVoidInvite,10000);
   setInterval(checkAgent,15000);
   setInterval(saveGame,30000);
+  scheduleRandomAttack(); // ataques aleatórios independentes de defesa
   // eventos globais — dispara entre 3 e 5 minutos
   const scheduleEvent=()=>{
     const delay=180000+Math.random()*120000;
@@ -2909,7 +3207,7 @@ runIntro();
 </script>
 
 <div style="text-align:center;padding:16px 0 8px;font-size:10px;color:#30363d;font-family:monospace">
-  <a href="/changelog.html" style="color:#30363d;text-decoration:none" onmouseover="this.style.color='#58a6ff'" onmouseout="this.style.color='#30363d'">v0.1.16 — ver changelog</a>
+  <a href="/changelog.html" style="color:#30363d;text-decoration:none" onmouseover="this.style.color='#58a6ff'" onmouseout="this.style.color='#30363d'">v0.1.21 — ver changelog</a>
 </div>
 
 </body>
