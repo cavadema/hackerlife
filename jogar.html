@@ -767,7 +767,7 @@ function clickPhish(id){
 function acceptMissionEmail(id){
   const em=inbox.find(m=>m.id===id);if(!em||em.acted)return;
   em.acted=true;em.actedResult="✓ aceita";
-  if(em.missionReward){const r=em.missionReward;S.money+=r.money||0;gainXP(r.xp||0);S.rep+=r.rep||0;S.heat=Math.min(100,S.heat+(r.heat||0));log("> missão por email aceita: +R$"+(r.money||0),"ok");toast("🎯 +R$"+(r.money||0));}
+  if(em.missionReward){const r=em.missionReward;S.money+=r.money||0;S._totalEarned=(S._totalEarned||0)+(r.money||0);gainXP(r.xp||0);S.rep+=r.rep||0;S.heat=Math.min(100,S.heat+(r.heat||0));log("> missão por email aceita: +R$"+(r.money||0),"ok");toast("🎯 +R$"+(r.money||0));}
   updateUI();renderPhone();
 }
 
