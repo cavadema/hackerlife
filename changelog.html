@@ -48,12 +48,103 @@ h1{font-size:15px;font-weight:700;color:#e6edf3;margin-top:24px;margin-bottom:4p
   <h1>Changelog</h1>
   <div class="subtitle">histórico de versões e atualizações do simuladordehacker.com.br</div>
 
+  <!-- v0.1.27 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag latest">v0.1.27</span>
+      <span class="version-date">03 Mai 2025</span>
+      <span class="badge-new">LATEST</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>SQL Injection virou múltipla escolha</strong> — passo 2 agora apresenta 4 opções de payload; errar dá explicação educativa de por que não funcionou</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Layout dos hacks no início</strong> — Wi-Fi clicável, Phishing card completo desativado, demais em linha compacta com cadeado — consistente com o delivery</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Mensagens do terminal</strong> — substituídas por mensagens que direcionam as primeiras ações do jogador</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>SMS do servidor Linux</strong> — chega 5s após atingir nível 2, em vez de 60s — sincronizado com o objetivo no painel</span></li>
+      <li class="change-item fix"><span class="badge-fix">FIX</span><span class="change-text"><strong>Tag script quebrava o jogo</strong> — opção de XSS no SQL Injection continha tag HTML real que impedia o jogo de abrir</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.26 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.26</span>
+      <span class="version-date">02 Mai 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>x0phantom: adiantamento + pagamento final</strong> — email paga R$150 como sinal ao aceitar; R$350 restantes chegam ao concluir a missão de SQL Injection no terminal</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Revisão geral de emails e SMS</strong> — aviso de phishing chega antes do phishing; SMS da delegacia com número real; SMS do Linux sem IP inconsistente; x0phantom aponta explicitamente para a missão correta</span></li>
+      <li class="change-item fix"><span class="badge-fix">FIX</span><span class="change-text"><strong>_totalEarned não atualizava em todos os fluxos</strong> — grana de missões, grupos, Blackout, webmail e doações agora contam corretamente nos objetivos de "Junte R$X"</span></li>
+      <li class="change-item fix"><span class="badge-fix">FIX</span><span class="change-text"><strong>Defacement abria janela do Crypto Airdrop</strong> — blocos else/if estavam mesclados; cada missão agora tem seu handler separado corretamente</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.25 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.25</span>
+      <span class="version-date">01 Mai 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Hacks e missões ordenados por valor</strong> — Wi-Fi R$15 → Ransomware R$220; Linux R$150 → Blackout R$1.800</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Progressive disclosure</strong> — só Wi-Fi e Pizza disponíveis no início; outros travados com mensagem clara até completar a primeira ação</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Objetivos com âncora</strong> — seta → no objetivo ativo; clicar rola suavemente até o painel correto</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Operação Blackout sincronizada</strong> — missão só desbloqueia 10s após o email de intel chegar, dando tempo de ler antes de ir às missões especiais</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>SQL Injection com introdução educativa</strong> — explica o conceito antes de pedir input; Crypto Airdrop também ganhou introdução com contexto</span></li>
+      <li class="change-item fix"><span class="badge-fix">FIX</span><span class="change-text"><strong>Phantom Syndicate não desbloqueava</strong> — requisito do Servidor VPS agora aparece claramente no card do grupo</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.24 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.24</span>
+      <span class="version-date">30 Abr 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Integração blog × rede social</strong> — botão "📝 Promover meu blog" aparece no x_hacker quando o blog está ativo, compartilhando posts para os seguidores</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Visitantes proporcionais aos seguidores</strong> — quanto mais seguidores, mais visitantes chegam ao blog ao promover. 50 seg → +15, 200 seg → +60, 500 seg → +150</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Botão no blog também</strong> — "🐦 Promover no x_hacker" disponível no painel do blog com estimativa de visitantes em tempo real</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.23 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.23</span>
+      <span class="version-date">29 Abr 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Missão: Interceptar bônus corporativo</strong> — entrar no webmail da Ana Paula (MedTech S.A.), navegar pela caixa de entrada realista e substituir a chave PIX antes do pagamento ser processado</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Caixa de entrada realista</strong> — 5 e-mails reais misturados (Netflix, condomínio, mãe, academia) — só um é o importante. O jogador precisa identificar</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Senhas fracas no Linux</strong> — além de "admin", aceita: 12345, 123456, password, root, 1234, admin123 e outras variações comuns</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
+  <!-- v0.1.22 -->
+  <div class="version-block">
+    <div class="version-header">
+      <span class="version-tag">v0.1.22</span>
+      <span class="version-date">29 Abr 2025</span>
+    </div>
+    <ul class="change-list">
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Emails reorganizados por nível</strong> — emails e SMS chegam no momento certo da progressão, não mais todos nos primeiros 3 minutos</span></li>
+      <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>SMS de orientação do Kr4ck3r_BR</strong> — chega 15s após o início contextualizando a situação do personagem e direcionando as primeiras ações</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Phishing no momento certo</strong> — MercadoLivre chega no nível 2, Bradesco no nível 3 — quando o jogador já entende o sistema</span></li>
+      <li class="change-item improvement"><span class="badge-improvement">MELHORIA</span><span class="change-text"><strong>Missões por e-mail atreladas ao nível</strong> — x0phantom (nível 3), delegacia GPS (nível 4), intel Blackout (nível 5)</span></li>
+    </ul>
+  </div>
+  <hr class="divider">
+
   <!-- v0.1.21 -->
   <div class="version-block">
     <div class="version-header">
-      <span class="version-tag latest">v0.1.21</span>
+      <span class="version-tag">v0.1.21</span>
       <span class="version-date">29 Abr 2025</span>
-      <span class="badge-new">LATEST</span>
     </div>
     <ul class="change-list">
       <li class="change-item new"><span class="badge-new">NEW</span><span class="change-text"><strong>Reputação com consequências reais</strong> — 4 tiers: Desconhecido → Conhecido → Respeitado → Lendário, cada um com efeitos práticos no jogo</span></li>
