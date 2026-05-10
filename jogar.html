@@ -256,7 +256,7 @@ h1 span{color:#484f58;font-size:11px;font-weight:400;display:block;margin-top:2p
   <div class="stats-grid-2" style="margin-top:7px">
     <div class="stat"><div class="stat-val blue" id="defense">0%</div><div class="stat-label">🛡️ defesa</div></div>
     <div class="stat"><div class="stat-val red" id="heat">0%</div><div class="stat-label">🔥 risco</div></div>
-    <div class="stat"><div class="stat-val" id="trace-chance" style="color:#f85149">100%</div><div class="stat-label">🚔 rastreio</div></div>
+    <div class="stat"><div class="stat-val" id="trace-chance" style="color:#f85149">100%</div><div class="stat-label">🚔 exposição</div></div>
   </div>
   <div class="bar-row"><span>XP</span><div class="bar-wrap"><div class="bar-fill" id="xp-bar" style="width:0%;background:#a371f7"></div></div><span id="xp-label" style="min-width:60px;text-align:right;font-size:9px">0/100</span></div>
   <div class="bar-row"><span>defesa</span><div class="bar-wrap"><div class="bar-fill" id="def-bar" style="width:0%;background:#58a6ff"></div></div></div>
@@ -921,7 +921,7 @@ function renderHacks(){
       <div class="btn-reward">${esg?"⚠️ esgotado":"+R$~"+earn+" · +"+a.xp+"xp"}</div>
       ${degLabel?`<div class="btn-req">${degLabel}</div>`:""}
       ${locked?`<div class="btn-req">🔒 ${a.reqItem&&!S.owned.has(a.reqItem)?"precisa: "+a.itemLabel:(a.lvl?"nível "+a.lvl:"")+(a.pwr?" / poder "+a.pwr+"x":"")}</div>`:""}
-      ${!esg&&!locked&&tc>50?`<div class="btn-req">⚠️ rastreio ${tc}%</div>`:""}
+      ${!esg&&!locked&&tc>50?`<div class="btn-req">⚠️ exposição ${tc}%</div>`:""}
       ${cd&&!esg?`<div class="btn-req">⏳ recarregando…</div>`:""}
       ${!esg?`<div class="uses-dots">${dots}</div>`:""}`;
     if(!cd&&!locked&&!esg)btn.onclick=()=>doHack(a);
@@ -1853,11 +1853,18 @@ const SHOP={
     {id:"antena",n:"Antena Wi-Fi",icon:"📡",p:90,bonus:"hacks +20%",effect:()=>{}},
   ],
   def:[
-    {id:"firewall",n:"Firewall básico",icon:"🧱",p:50,bonus:"defesa +20%",effect:()=>{S.defense=Math.min(100,S.defense+20);}},
+    {id:"firewall",n:"Firewall básico",icon:"🧱",p:50,bonus:"defesa +20%",effect:()=>{
+      S.defense=Math.min(100,S.defense+20);
+      setTimeout(()=>{
+        log("> [Kr4ck3r_BR] boa. firewall instalado.","ok");
+        log("> agora você tem uma barreira básica contra invasões.","dim");
+        log("> pode hackear mais sem medo de levar um ataque de volta.","dim");
+      },800);
+    }},
     {id:"vpn",n:"VPN Pro",icon:"🔒",p:80,bonus:"defesa +25% · risco -15% · Salles recua",effect:()=>{
       S.defense=Math.min(100,S.defense+25);
       S.heat=Math.max(0,S.heat-15);
-      // VPN dificulta rastreio — Salles perde um nível
+      // VPN dificulta exposição — Salles perde um nível
       if(S.agent.level>0){
         S.agent.level=Math.max(0,S.agent.level-1);
         delete S.agent["sent_"+( S.agent.level+1)]; // permite reenvio se escalar novamente
@@ -1884,7 +1891,7 @@ const SHOP={
       S._agentPaused=true;
       log("> IP trocado — risco -35% · Salles perdeu o rastro por 1 minuto","ok");
       toast("🌐 IP trocado! Salles pausado.");
-      setTimeout(()=>{S._agentPaused=false;log("> Salles retomou rastreio","warn");},60000);
+      setTimeout(()=>{S._agentPaused=false;log("> Salles retomou monitoramento","warn");},60000);
     }},
     {id:"offline",   n:"Modo offline",     icon:"🔐",p:80, bonus:"risco -50% imediato",  consumable:true, effect:()=>{S.heat=Math.max(0,S.heat-50);log("> modo offline ativado — risco -50%","ok");toast("🔐 Risco -50%!");}},
   ]
@@ -3588,8 +3595,7 @@ function initGame(){
   renderPhone();
   setupSocialButtons();
   log("> ghost_zero online. hora de começar.","ok");
-  log("> Kr4ck3r_BR está esperando sua resposta.","warn");
-  log("> DICA: compre Firewall antes de hackear muito.","dim");
+  log("> comece com uma entrega ou quebre o wi-fi do vizinho.","dim");
   // contra-hack passivo
   setInterval(()=>{
     if(S.heat>60&&S.defense<30&&S.money>30&&!_invasionActive){
