@@ -1847,10 +1847,10 @@ function renderDelivery(){
 // SHOP
 const SHOP={
   atk:[
-    {id:"ram",n:"RAM 16GB",icon:"🧠",p:80,bonus:"poder ×1.5",effect:()=>{S.power=+(S.power*1.5).toFixed(1);}},
-    {id:"gpu",n:"GPU usada",icon:"🖥️",p:160,bonus:"poder ×2",effect:()=>{S.power=+(S.power*2).toFixed(1);}},
-    {id:"server",n:"Servidor VPS",icon:"🗄️",p:220,bonus:"poder ×3 +rep",effect:()=>{S.power=+(S.power*3).toFixed(1);S.rep+=10;}},
-    {id:"antena",n:"Antena Wi-Fi",icon:"📡",p:90,bonus:"hacks +20%",effect:()=>{}},
+    {id:"ram",n:"RAM 16GB",icon:"🧠",p:80,bonus:"poder ×1.5 · desbloqueia câmeras",effect:()=>{S.power=+(S.power*1.5).toFixed(1);}},
+    {id:"gpu",n:"GPU usada",icon:"🖥️",p:160,bonus:"poder ×2 · desbloqueia cryptojacking",effect:()=>{S.power=+(S.power*2).toFixed(1);}},
+    {id:"server",n:"Servidor VPS",icon:"🗄️",p:220,bonus:"poder ×3 · necessário para Phantom Syndicate",effect:()=>{S.power=+(S.power*3).toFixed(1);S.rep+=10;}},
+    {id:"antena",n:"Antena Wi-Fi",icon:"📡",p:90,bonus:"hacks +20% · desbloqueia interceptação de rede",effect:()=>{}},
   ],
   def:[
     {id:"firewall",n:"Firewall básico",icon:"🧱",p:50,bonus:"defesa +20%",effect:()=>{
@@ -1874,13 +1874,13 @@ const SHOP={
     }},
     {id:"antivirus",n:"Antivírus",icon:"🦠",p:60,bonus:"dano phishing -50%",effect:()=>{}},
     {id:"emailscanner",n:"Scanner de E-mail",icon:"🔍",p:90,bonus:"detecta phishing",effect:()=>{log("> scanner de e-mail instalado!","ok");}},
-    {id:"proxychains",n:"ProxyChains",icon:"🌐",p:120,bonus:"defesa +30%",effect:()=>{S.defense=Math.min(100,S.defense+30);}},
-    {id:"ids",n:"IDS/IPS",icon:"👁️",p:180,bonus:"defesa +25%",effect:()=>{S.defense=Math.min(100,S.defense+25);}},
+    {id:"proxychains",n:"ProxyChains",icon:"🌐",p:120,bonus:"defesa +30% · bloqueia roubo e vazamento",effect:()=>{S.defense=Math.min(100,S.defense+30);}},
+    {id:"ids",n:"IDS/IPS",icon:"👁️",p:180,bonus:"defesa +25% · remove backdoor e spyware",effect:()=>{S.defense=Math.min(100,S.defense+25);}},
     {id:"waf",n:"WAF — Web App Firewall",icon:"🛡️",p:100,bonus:"protege blog de defacement",effect:()=>{log("> WAF instalado — blog protegido contra ataques","ok");toast("🛡️ WAF ativo! Blog protegido.");S.defense=Math.min(100,S.defense+10);}},
   ],
   del:[
-    {id:"moto_prop",n:"Moto própria",icon:"🏍️",p:130,bonus:"delivery +50%",effect:()=>{}},
-    {id:"ifood_pro",n:"iFood Pro",icon:"📱",p:70,bonus:"delivery +30%",effect:()=>{}},
+    {id:"moto_prop",n:"Moto própria",icon:"🏍️",p:130,bonus:"ganho por entrega +50%",effect:()=>{}},
+    {id:"ifood_pro",n:"iFood Pro",icon:"📱",p:70,bonus:"ganho por entrega +30%",effect:()=>{}},
   ],
   cons:[
     {id:"xp_small",  n:"Boost XP pequeno", icon:"🚀",p:30, bonus:"+50 XP imediato",      consumable:true, effect:()=>{gainXP(50); log("> boost XP: +50 XP","ok"); toast("🚀 +50 XP!");}},
