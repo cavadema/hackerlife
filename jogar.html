@@ -322,25 +322,13 @@ h1 span{color:#484f58;font-size:11px;font-weight:400;display:block;margin-top:2p
 </div>
 
 <!-- 8. MISSÕES ESPECIAIS -->
-<div class="panel">
+<div class="panel" id="panel-missions" style="display:none">
   <div class="panel-title">🕵️ missões especiais</div>
   <div class="actions-grid" id="mission-actions"></div>
 </div>
 
-<!-- 9. FREELANCE -->
-<div class="panel">
-  <div class="panel-title">🔧 freelance</div>
-  <div class="actions-grid" id="freelance-actions"></div>
-</div>
-
-<!-- 10. GRUPOS -->
-<div class="panel">
-  <div class="panel-title">👥 grupos hackers</div>
-  <div id="groups-section"></div>
-</div>
-
-<!-- 11. REDE SOCIAL -->
-<div class="panel">
+<!-- 9. REDE SOCIAL -->
+<div class="panel" id="panel-social" style="display:none">
   <div class="panel-title">🐦 x_hacker <span style="color:#484f58;font-weight:400;font-size:9px">— rede social anônima</span></div>
   <div class="social-header">
     <div class="social-avatar">🕶️</div>
@@ -374,14 +362,26 @@ h1 span{color:#484f58;font-size:11px;font-weight:400;display:block;margin-top:2p
   </div>
 </div>
 
+<!-- 10. GRUPOS -->
+<div class="panel" id="panel-groups" style="display:none">
+  <div class="panel-title">👥 grupos hackers</div>
+  <div id="groups-section"></div>
+</div>
+
+<!-- 11. FREELANCE -->
+<div class="panel" id="panel-freelance" style="display:none">
+  <div class="panel-title">🔧 freelance</div>
+  <div class="actions-grid" id="freelance-actions"></div>
+</div>
+
 <!-- 12. BLOG -->
-<div class="panel">
+<div class="panel" id="panel-blog" style="display:none">
   <div class="panel-title">📝 blog — <span id="blog-status-label" style="color:#484f58;font-weight:400">não criado</span></div>
   <div id="blog-section"></div>
 </div>
 
 <!-- 13. CURSOS -->
-<div class="panel">
+<div class="panel" id="panel-courses" style="display:none">
   <div class="panel-title">🎓 cursos técnicos</div>
   <div class="course-grid" id="course-grid"></div>
 </div>
@@ -493,6 +493,26 @@ function toast(m){const e=document.getElementById("toast");e.textContent=m;e.cla
 function log(m,c=""){const t=document.getElementById("terminal");const d=document.createElement("div");d.className="line "+c;d.textContent=m;t.appendChild(d);t.scrollTop=t.scrollHeight;if(t.children.length>60)t.removeChild(t.children[0]);}
 function showAlert(t,m){document.getElementById("alert-title").textContent=t;document.getElementById("alert-msg").textContent=m;document.getElementById("alert-bar").classList.remove("hidden");updateVulnIndicator();}
 
+function updatePanelVisibility(){
+  const show=(id)=>{const el=document.getElementById(id);if(el)el.style.display="";};
+
+  // missões e freelance — só após completar missão Linux
+  if(S.doneMissions.has("linux_noob")){show("panel-missions");show("panel-freelance");}
+  else if(S.doneMissions.has("linux_noob")||OBJECTIVES.findIndex(o=>o.id==="linux_mission")===OBJECTIVES.findIndex(o=>!o.check())){show("panel-missions");}
+
+  // rede social — após primeiro post ou quando objetivo first_post for o ativo
+  if(S.social.posts>0||OBJECTIVES.findIndex(o=>o.id==="first_post")===OBJECTIVES.findIndex(o=>!o.check())){show("panel-social");}
+
+  // grupos — após entrar no grupo ou quando objetivo join_group for o ativo
+  if(S.groups.member!==null||OBJECTIVES.findIndex(o=>o.id==="join_group")===OBJECTIVES.findIndex(o=>!o.check())){show("panel-groups");}
+
+  // cursos — após fazer curso ou quando objetivo do_course for o ativo
+  if(Object.values(S.courses).includes("done")||OBJECTIVES.findIndex(o=>o.id==="do_course")===OBJECTIVES.findIndex(o=>!o.check())){show("panel-courses");}
+
+  // blog — após criar blog ou quando objetivo create_blog for o ativo
+  if(S.blog.created||OBJECTIVES.findIndex(o=>o.id==="create_blog")===OBJECTIVES.findIndex(o=>!o.check())){show("panel-blog");}
+}
+
 function updateVulnIndicator(){
   const vuln=document.getElementById("vuln-bar");
   const alertActive=!document.getElementById("alert-bar").classList.contains("hidden");
@@ -534,8 +554,8 @@ const OBJECTIVES=[
   {id:"followers_50",    text:"Acumule 50 seguidores no x_hacker",     sub:"poste sobre hacks e tutoriais para crescer",                     check:()=>S.social.followers>=50},
   {id:"buy_def_upgrade", text:"Compre um upgrade de defesa",            sub:"upgrades → defesa → VPN Pro ou ProxyChains",                   check:()=>S.owned.has("vpn")||S.owned.has("proxychains")||S.owned.has("ids")},
   {id:"earn_500",        text:"Junte R$500",                            sub:"diversifique — hacks, delivery, freelance e blog",               check:()=>S._totalEarned>=500},
-  {id:"crypto_mission",  text:"Complete a missão Crypto Airdrop",       sub:"missões especiais → 'Phishing: Crypto Airdrop'",               check:()=>S.doneMissions.has("crypto_airdrop")},
   {id:"reach_level5",    text:"Alcance o nível 5",                      sub:"continue hackeando e completando missões",                       check:()=>S.level>=5},
+  {id:"crypto_mission",  text:"Complete a missão Crypto Airdrop",       sub:"missões especiais → 'Phishing: Crypto Airdrop'",               check:()=>S.doneMissions.has("crypto_airdrop")},
   {id:"phantom_group",   text:"Entre no Phantom Syndicate",             sub:"grupos hackers — nível 6 + rep 40 + missão linux concluída",    check:()=>S.groups.member==="phantom"||S.groups.member==="vxvoid"},
 ];
 
@@ -705,6 +725,7 @@ function updateUI(){
   renderHacks();renderMissions();renderFreelance();renderBlog();renderCourses();renderDelivery();renderShop();updateSocial();renderGroups();renderObjectives();
   updateVulnIndicator();
   checkRiskOverflow();
+  updatePanelVisibility();
 }
 
 // INBOX
@@ -1678,9 +1699,9 @@ function renderMissions(){
 
 // FREELANCE
 const FREELANCE=[
-  {id:"fix_site",t:"Corrigir site derrubado",s:"e-commerce sem vender há 2h",m:180,bonus:60,xp:40,rep:3,cd:12000},
-  {id:"config_fw",t:"Configurar firewall",s:"empresa pequena, Linux",m:220,xp:55,rep:4,cd:15000,lvl:2},
-  {id:"pentest",t:"Pentest autorizado",s:"cliente pagou pelo teste",m:400,bonus:100,xp:80,rep:6,cd:20000,lvl:3},
+  {id:"fix_site",t:"Corrigir site derrubado",s:"e-commerce sem vender há 2h",  m:240,xp:30,rep:3,cd:12000},
+  {id:"config_fw",t:"Configurar firewall",   s:"empresa pequena, Linux",        m:320,xp:50,rep:4,cd:15000,lvl:2},
+  {id:"pentest",  t:"Pentest autorizado",    s:"cliente pagou pelo teste",       m:500,xp:80,rep:6,cd:20000,lvl:3},
 ];
 
 function renderFreelance(){
@@ -1689,15 +1710,14 @@ function renderFreelance(){
     const locked=a.lvl&&S.level<a.lvl,cd=!!S.cds["fl_"+a.id];
     const btn=document.createElement("div");btn.className="action-btn"+(locked||cd?" disabled":"");
     btn.innerHTML=`<div class="btn-title">${a.t}</div><div class="btn-sub">${a.s}</div>
-      <div class="btn-reward">+R$${a.m+(a.bonus||0)}${a.bonus?" (bônus R$"+a.bonus+")":""} · +${a.xp}xp</div>
+      <div class="btn-reward">+R$${a.m} · +${a.xp}xp · rep +${a.rep}</div>
       ${locked?`<div class="btn-req">🔒 nível ${a.lvl}</div>`:""}
       ${cd?`<div class="btn-req">⏳ próximo cliente…</div>`:""}`;
     if(!locked&&!cd)btn.onclick=()=>{
-      S.money+=a.m+(a.bonus||0);gainXP(a.xp);S.rep+=a.rep;
+      S.money+=a.m;gainXP(a.xp);S.rep+=a.rep;
       S._freelanceDone=true;
-      S._totalEarned=(S._totalEarned||0)+a.m+(a.bonus||0);
-      log("> freelance: "+a.t+" → R$"+(a.m+(a.bonus||0))+(a.bonus?" (bônus!)":""),"ok");
-      if(a.bonus)toast("🎉 Bônus! +R$"+a.bonus);
+      S._totalEarned=(S._totalEarned||0)+a.m;
+      log("> freelance: "+a.t+" → R$"+a.m,"ok");
       S.cds["fl_"+a.id]=true;setTimeout(()=>{delete S.cds["fl_"+a.id];renderFreelance();},a.cd);
       updateUI();
     };
