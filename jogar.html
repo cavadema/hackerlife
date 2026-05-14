@@ -291,19 +291,7 @@ h1 span{color:#484f58;font-size:11px;font-weight:400;display:block;margin-top:2p
   <div class="actions-grid" id="delivery-actions"></div>
 </div>
 
-<!-- 6. UPGRADES -->
-<div class="panel">
-  <div class="panel-title">🛒 upgrades</div>
-  <div class="tab-row">
-    <div class="tab active" onclick="setShopTab('atk',this)">⚡ ataque</div>
-    <div class="tab" onclick="setShopTab('def',this)">🛡️ defesa</div>
-    <div class="tab" onclick="setShopTab('del',this)">🛵 delivery</div>
-    <div class="tab" onclick="setShopTab('cons',this)">⚡ boost</div>
-  </div>
-  <div class="shop-grid" id="shop"></div>
-</div>
-
-<!-- 7. CELULAR -->
+<!-- 6. CELULAR -->
 <div class="panel" id="phone-anchor">
   <div class="panel-title">📱 celular <span class="badge-count" id="phone-notif-total" style="display:none">0</span></div>
   <div class="phone-wrap">
@@ -319,6 +307,18 @@ h1 span{color:#484f58;font-size:11px;font-weight:400;display:block;margin-top:2p
       <div class="phone-body" id="phone-body"></div>
     </div>
   </div>
+</div>
+
+<!-- 7. UPGRADES -->
+<div class="panel">
+  <div class="panel-title">🛒 upgrades</div>
+  <div class="tab-row">
+    <div class="tab active" onclick="setShopTab('atk',this)">⚡ ataque</div>
+    <div class="tab" onclick="setShopTab('def',this)">🛡️ defesa</div>
+    <div class="tab" onclick="setShopTab('del',this)">🛵 delivery</div>
+    <div class="tab" onclick="setShopTab('cons',this)">⚡ boost</div>
+  </div>
+  <div class="shop-grid" id="shop"></div>
 </div>
 
 <!-- 8. MISSÕES ESPECIAIS -->
@@ -817,10 +817,12 @@ const HACKS=[
   {id:"phish",     t:"Phishing simples",             s:"e-mail falso de banco",                       m:40, xp:20,rep:2,heat:8, cd:5000, max:4,reset:90000},
   {id:"ftp",       t:"Invadir servidor FTP",         s:"credencial padrão, baixar arquivos internos", m:70, xp:28,rep:3,heat:10,cd:6000, max:4,reset:100000,lvl:2},
   {id:"wifi_pro",  t:"Interceptar tráfego de rede", s:"sniffing avançado com antena potente",         m:85, xp:30,rep:3,heat:10,cd:6000, max:4,reset:90000, lvl:1,reqItem:"antena",itemLabel:"Antena Wi-Fi"},
-  {id:"scrape",    t:"Vazar dados",                  s:"scraping + dark web",                         m:90, xp:35,rep:4,heat:12,cd:7000, max:3,reset:120000,lvl:2,pwr:2},
-  {id:"cameras",   t:"Invadir câmeras de segurança", s:"acesso remoto a câmeras IP mal configuradas", m:110,xp:40,rep:5,heat:14,cd:8000, max:3,reset:120000,lvl:2,reqItem:"ram",   itemLabel:"RAM 16GB"},
-  {id:"cryptojack",t:"Cryptojacking",               s:"minerar crypto na máquina alheia",             m:160,xp:55,rep:6,heat:16,cd:9000, max:3,reset:150000,lvl:3,reqItem:"gpu",   itemLabel:"GPU usada"},
-  {id:"ransom",    t:"Ransomware local",             s:"empresa pequena",                             m:220,xp:60,rep:8,heat:20,cd:10000,max:2,reset:180000,lvl:4,pwr:3},
+  {id:"scrape",    t:"Vazar dados",                  s:"scraping + dark web",                         m:90, xp:35,rep:4,heat:12,cd:7000, max:3,reset:120000,lvl:4,pwr:2},
+  {id:"cameras",   t:"Invadir câmeras de segurança", s:"acesso remoto a câmeras IP mal configuradas", m:110,xp:40,rep:5,heat:14,cd:8000, max:3,reset:120000,lvl:3,reqItem:"ram",   itemLabel:"RAM 16GB"},
+  {id:"cryptojack",t:"Cryptojacking",               s:"minerar crypto na máquina alheia",             m:160,xp:55,rep:6,heat:16,cd:9000, max:3,reset:150000,lvl:5,reqItem:"gpu",   itemLabel:"GPU usada"},
+  {id:"social_eng",t:"Engenharia social",             s:"se passar por suporte técnico e obter acesso",    m:130,xp:45,rep:5,heat:10,cd:8000, max:3,reset:120000,lvl:4},
+  {id:"keylogger", t:"Keylogger corporativo",          s:"instalar gravador de teclas em máquina da empresa",m:170,xp:50,rep:6,heat:14,cd:9000, max:3,reset:140000,lvl:5},
+  {id:"ransom",    t:"Ransomware local",               s:"empresa pequena",                                 m:220,xp:60,rep:8,heat:20,cd:10000,max:2,reset:180000,lvl:6,pwr:3},
 ];
 
 // retorna o multiplicador de degradação baseado em ciclos repetidos (entre resets)
@@ -1626,15 +1628,15 @@ const MISSIONS=[
    hints:["tenta o usuário mais óbvio","senha de preguiçoso...","usuário: admin  senha: admin"]},
   {id:"sqli",          t:"SQL Injection manual",           s:"extrair banco de dados de e-commerce vulnerável",  reward:"+R$350 · +65xp · rep +7",              m:350,xp:65, rep:7, heat:16,lvl:2,
    hints:["tenta fechar a query com aspas simples","o payload clássico é ' OR '1'='1","campo de login: ' OR '1'='1' --"]},
-  {id:"webmail_bonus", t:"Interceptar bônus corporativo",  s:"entrar no webmail da vítima e desviar o PIX",      reward:"+R$480 · +70xp · rep +8 · risco +20%", m:480,xp:70, rep:8, heat:20,lvl:2,
+  {id:"webmail_bonus", t:"Interceptar bônus corporativo",  s:"entrar no webmail da vítima e desviar o PIX",      reward:"+R$480 · +70xp · rep +8 · risco +20%", m:480,xp:70, rep:8, heat:20,lvl:3,
    hints:["tenta senha fraca — data de nascimento, nome+123","procura e-mail do RH sobre pagamento de bônus","substitui a chave PIX antes da confirmação"]},
-  {id:"crypto_airdrop",t:"Phishing: Crypto Airdrop",      s:"fingir ser projeto famoso, roubar carteiras",      reward:"+R$320 · +70xp · rep +8",              m:320,xp:70, rep:8, heat:18,lvl:3,
+  {id:"crypto_airdrop",t:"Phishing: Crypto Airdrop",      s:"fingir ser projeto famoso, roubar carteiras",      reward:"+R$320 · +70xp · rep +8",              m:320,xp:70, rep:8, heat:18,lvl:4,
    hints:["qual projeto crypto mais famoso do momento?","o domínio precisa parecer oficial — troca uma letra","a carteira destino tem que parecer legítima"]},
-  {id:"defacement",    t:"Defacement comemorativo",        s:"invadir site de prefeitura — deixar mensagem",     reward:"+R$0 · +60xp · rep +12 · +300 seg",    m:0,  xp:60, rep:12,heat:14,lvl:3,
+  {id:"defacement",    t:"Defacement comemorativo",        s:"invadir site de prefeitura — deixar mensagem",     reward:"+R$0 · +60xp · rep +12 · +300 seg",    m:0,  xp:60, rep:12,heat:14,lvl:5,
    hints:["acesse o painel admin do site","senha padrão de CMS: admin/admin123","a mensagem precisa ter o nome de um hacker famoso"]},
-  {id:"honeytrap_gps", t:"Armadilha: Foto Vazada",        s:"isca digital com rastreador GPS — alvo para polícia",reward:"+R$0 · +80xp · rep +15 · risco -10%", m:0,  xp:80, rep:15,heat:-10,lvl:4,
+  {id:"honeytrap_gps", t:"Armadilha: Foto Vazada",        s:"isca digital com rastreador GPS — alvo para polícia",reward:"+R$0 · +80xp · rep +15 · risco -10%", m:0,  xp:80, rep:15,heat:-10,lvl:6,
    hints:["o link precisa parecer tentador e real","o pixel de rastreio é invisível na imagem","ao abrir, captura IP + GPS e envia direto para a delegacia"]},
-  {id:"blackout",      t:"Operação Blackout",              s:"hackear o Banco Central — e escapar da polícia",   reward:"+R$1.800 · +120xp · rep +20",           m:0,  xp:0,  rep:0,  heat:0, lvl:5, reqUnlocked:"_blackoutUnlocked",
+  {id:"blackout",      t:"Operação Blackout",              s:"hackear o Banco Central — e escapar da polícia",   reward:"+R$1.800 · +120xp · rep +20",           m:0,  xp:0,  rep:0,  heat:0, lvl:7, reqUnlocked:"_blackoutUnlocked",
    hints:["Log4Shell é a vulnerabilidade mais famosa de 2021","extraia o que vale mais: chaves de API","quando a polícia chegar, decida rápido — o tempo corre"]},
 ];
 
@@ -2787,9 +2789,9 @@ const LEVEL_EMAILS=[
     body:"ghost_zero,\n\nTemos um suspeito que usa a internet para crimes e some sempre que chegamos perto.\n\nPrecisamos de alguém com suas habilidades para montar uma armadilha digital — um link com rastreador GPS.\n\nNão há pagamento em dinheiro — mas garantimos imunidade total pelas suas atividades recentes.\n\nSe topar, acesse as Missões Especiais — Armadilha: Foto Vazada.\n\n— Del. Carvalho / PCSC",
     missionReward:null}},
   // nível 5 — blackout
-  {id:"blackout_sms", minLevel:5, sent:false,
+  {id:"blackout_sms", minLevel:7, sent:false,
    sms:{from:"Kr4ck3r_BR", text:"ghost_zero. tô te mandando uma coisa. não pergunta de onde veio. só lê.", isMe:false}},
-  {id:"blackout_email", minLevel:5, sent:false, delayAfter:3000,
+  {id:"blackout_email", minLevel:7, sent:false, delayAfter:3000,
    email:{from:"intel@phantom-syndicate.onion",type:"mission",
     subject:"INTEL QUENTE — janela de 4min no BACEN",time:"agora",
     preview:"servidor de homologação exposto por erro...",
@@ -3630,7 +3632,7 @@ runIntro();
 </script>
 
 <div style="text-align:center;padding:16px 0 8px;font-size:10px;color:#30363d;font-family:monospace">
-  <a href="/changelog.html" style="color:#30363d;text-decoration:none" onmouseover="this.style.color='#58a6ff'" onmouseout="this.style.color='#30363d'">v0.1.27 — ver changelog</a>
+  <a href="/changelog.html" style="color:#30363d;text-decoration:none" onmouseover="this.style.color='#58a6ff'" onmouseout="this.style.color='#30363d'">v0.1.28 — ver changelog</a>
 </div>
 
 </body>
