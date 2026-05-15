@@ -496,9 +496,11 @@ function showAlert(t,m){document.getElementById("alert-title").textContent=t;doc
 function updatePanelVisibility(){
   const show=(id)=>{const el=document.getElementById(id);if(el)el.style.display="";};
 
-  // missões e freelance — só após completar missão Linux
-  if(S.doneMissions.has("linux_noob")){show("panel-missions");show("panel-freelance");}
-  else if(S.doneMissions.has("linux_noob")||OBJECTIVES.findIndex(o=>o.id==="linux_mission")===OBJECTIVES.findIndex(o=>!o.check())){show("panel-missions");}
+  // missões — após completar missão Linux
+  if(S.doneMissions.has("linux_noob")||OBJECTIVES.findIndex(o=>o.id==="linux_mission")===OBJECTIVES.findIndex(o=>!o.check())){show("panel-missions");}
+
+  // freelance — só quando for a próxima missão ou já concluído
+  if(S._freelanceDone||OBJECTIVES.findIndex(o=>o.id==="do_freelance")===OBJECTIVES.findIndex(o=>!o.check())){show("panel-freelance");}
 
   // rede social — após primeiro post ou quando objetivo first_post for o ativo
   if(S.social.posts>0||OBJECTIVES.findIndex(o=>o.id==="first_post")===OBJECTIVES.findIndex(o=>!o.check())){show("panel-social");}
