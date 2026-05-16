@@ -1661,6 +1661,10 @@ const MISSIONS=[
    hints:["o link precisa parecer tentador e real","o pixel de rastreio é invisível na imagem","ao abrir, captura IP + GPS e envia direto para a delegacia"]},
   {id:"blackout",      t:"Operação Blackout",              s:"hackear o Banco Central — e escapar da polícia",   reward:"+R$1.800 · +120xp · rep +20",           m:0,  xp:0,  rep:0,  heat:0, lvl:7, reqUnlocked:"_blackoutUnlocked",
    hints:["Log4Shell é a vulnerabilidade mais famosa de 2021","extraia o que vale mais: chaves de API","quando a polícia chegar, decida rápido — o tempo corre"]},
+  {id:"nota_facul",    t:"Missão: Alterar nota na faculdade", s:"filho de empresário quer passar de ano — decisão moral", reward:"+R$800 · +90xp · rep +10 · risco +25%",  m:800,xp:90, rep:10,heat:25,lvl:8,
+   hints:["acesse o portal do professor — senha fraca","encontre a disciplina certa no histórico","cuidado com o log de auditoria — não altere demais"]},
+  {id:"netflix_leak",  t:"Missão: Infiltrar servidores da Netflix", s:"vazar episódio inédito de série aguardada — decisão final", reward:"+R$1.200 · +100xp · rep +15 ou +25",     m:0,  xp:100,rep:15,heat:30,lvl:9,
+   hints:["servidores de produção têm nomes em código","arquivos de série têm padrão: sigla+temporada+ep","decisão final: vender, vazar ou devolver"]},
 ];
 
 function renderMissions(){
@@ -2011,6 +2015,41 @@ function openMission(id){
       document.getElementById("minput").focus();
       _step=0;
     },400);
+  } else if(id==="netflix_leak"){
+    mlog("// MISSÃO: INFILTRAR SERVIDORES DA NETFLIX","sys");
+    mlog("alvo: prod-storage.netflix.internal","warn");
+    mlog("","");
+    mlog("vulnerabilidade: servidor de homologação exposto","dim");
+    mlog("credencial padrão de dev não foi revogada","dim");
+    mlog("","");
+    mlog("PASSO 1/3 — acesse o servidor de produção:","warn");
+    mlog("  login: dev.staging@netflix.com","dim");
+    mlog("","");
+    setTimeout(()=>{
+      document.getElementById("mprompt").textContent="senha: ";
+      document.getElementById("minput").type="password";
+      document.getElementById("minput").focus();
+      _step=0;
+    },400);
+  } else if(id==="nota_facul"){
+    mlog("// MISSÃO: ALTERAR NOTA NA FACULDADE","sys");
+    mlog("alvo: sistema acadêmico USP — portal do professor","warn");
+    mlog("","");
+    mlog("Intel do M.B.: prof. responsável pela disciplina","");
+    mlog("Prof. Dr. Roberto Alves — Cálculo III — turma 2024B","");
+    mlog("","");
+    mlog("sistema identificado: Júpiter Web (USP)","dim");
+    mlog("vulnerabilidade: portal do professor com senha fraca","dim");
+    mlog("","");
+    mlog("PASSO 1/3 — acesse o portal do professor:","warn");
+    mlog("  login padrão: roberto.alves@usp.br","dim");
+    mlog("","");
+    setTimeout(()=>{
+      document.getElementById("mprompt").textContent="senha: ";
+      document.getElementById("minput").type="password";
+      document.getElementById("minput").focus();
+      _step=0;
+    },400);
   } else if(id==="honeytrap_gps"){
     mlog("// OPERAÇÃO: ARMADILHA DIGITAL — COLABORAÇÃO POLICIAL","sys");
     mlog("","");
@@ -2078,6 +2117,8 @@ function submitMission(){
   if(_mission==="__operation__"){submitOperation(document.getElementById("minput").value.trim());return;}
   if(_mission==="vx_technova"){submitTechNova();return;}
   if(_mission==="webmail_bonus"){submitWebmail();return;}
+  if(_mission==="nota_facul"){submitNotaFacul();return;}
+  if(_mission==="netflix_leak"){submitNetflixLeak();return;}
   if(_mission==="sqli"){submitSQLI();return;}
   if(_mission==="defacement"){submitDefacement();return;}
   if(_mission==="blackout"){
@@ -2820,6 +2861,17 @@ const LEVEL_EMAILS=[
     body:"ghost_zero,\n\nChegou uma intel de dentro.\n\nServidor de homologação do Banco Central foi exposto por erro de configuração de um dev júnior. Janela estimada: 4 minutos antes do patch automático.\n\nDados disponíveis: transferências internas, chaves de API de parceiros, identidade de correntistas VIP.\n\nRisco alto. Recompensa proporcional.\n\nA missão estará disponível em instantes.\n\n— intel",
     missionReward:null},
    onSent:()=>setTimeout(()=>{S._blackoutUnlocked=true;renderMissions();log("> [BLACKOUT] janela de acesso aberta — missões especiais","warn");toast("🏦 Operação Blackout disponível!");},10000)},
+  // nível 9 — Netflix
+  {id:"netflix_sms", minLevel:9, sent:false,
+   sms:{from:"Kr4ck3r_BR", text:"ghost_zero. tô vendo que você tá ficando bom nisso. tenho uma intel interessante. servidores de produção da Netflix com vulnerabilidade aberta. stranger things 5 tá lá. o que você faz com isso é decisão sua.", isMe:false}},
+  {id:"filho_rico_sms", minLevel:8, sent:false,
+   sms:{from:"+55 11 9****-4821", text:"vi seu trabalho. tenho uma proposta. não é barato. interessado?", isMe:false}},
+  {id:"filho_rico_email", minLevel:8, sent:false, delayAfter:8000,
+   email:{from:"m.brandao.filho@gmail.com",type:"mission",
+    subject:"Proposta — serviço discreto",time:"agora",
+    preview:"meu pai não precisa saber...",
+    body:"ghost_zero,\n\nMeu nome não importa. Meu pai é dono da Brandão Participações.\n\nEstou reprovado em Cálculo III na USP. Se não passar esse semestre, perco a mesada e o apartamento.\n\nPreciso que a nota 4,2 vire 7,0 no sistema da faculdade.\n\nPago R$800 em cripto, na hora.\n\nSe aceitar, acesse as Missões Especiais.\n\n— M.B.",
+    missionReward:null}},
 ];
 
 EMAIL_QUEUE.forEach(item=>setTimeout(()=>{
@@ -2933,6 +2985,227 @@ function runIntro(){
       }
     },d);
   });
+}
+
+// ---- NETFLIX LEAK ----
+const SENHAS_NETFLIX=["netflix2024","staging123","dev123","password","netflix","n3tfl1x","dev2024","staging"];
+
+function submitNetflixLeak(){
+  const val=document.getElementById("minput").value.trim();
+  document.getElementById("minput").value="";
+
+  if(_step===0){
+    const pass=val.toLowerCase();
+    document.getElementById("minput").type="text";
+    document.getElementById("minput-row").style.display="none";
+    setTimeout(()=>mlog("autenticando...","dim"),300);
+    setTimeout(()=>{
+      if(SENHAS_NETFLIX.includes(pass)||pass.includes("netflix")||pass.includes("dev")||pass.includes("staging")){
+        mlog("","");mlog("acesso concedido — Netflix Production Storage","ok");
+        mlog("","");
+        setTimeout(()=>{
+          mlog("PASSO 2/3 — navegando nos arquivos de produção:","warn");
+          mlog("","");
+          mlog("  /projects/BRK_S2/","dim");
+          mlog("  /projects/OBX_S4_EP08_FINAL.mkv  — 4.2GB","dim");
+          mlog("  /projects/ST5/","dim");
+          mlog("  /projects/ST5/ST5_EP01_FINAL_v3.mkv — 6.8GB ← ","warn");
+          mlog("  /projects/ST5/ST5_EP02_ROUGH_v1.mkv — 5.1GB","dim");
+          mlog("  /projects/WED_S3_TRAILER.mp4 — 0.3GB","dim");
+          mlog("","");
+          mlog("qual arquivo você vai extrair?","");
+          mlog("  [1] ST5_EP01_FINAL_v3.mkv — episódio 1 completo","dim");
+          mlog("  [2] ST5_EP02_ROUGH_v1.mkv — episódio 2 em rascunho","dim");
+          mlog("  [3] OBX_S4_EP08_FINAL.mkv — outra série","dim");
+          mlog("","");
+          document.getElementById("mprompt").textContent="arquivo (1-3): ";
+          document.getElementById("minput-row").style.display="flex";
+          document.getElementById("minput").focus();
+          _step=1;
+        },600);
+      } else {
+        mlog("","");mlog("credencial inválida.","err");
+        mlog("dica: devs usam senhas simples — tenta variações de netflix ou staging","warn");
+        setTimeout(()=>{
+          document.getElementById("mprompt").textContent="senha: ";
+          document.getElementById("minput").type="password";
+          document.getElementById("minput-row").style.display="flex";
+          document.getElementById("minput").focus();
+        },600);
+      }
+    },900);
+
+  } else if(_step===1){
+    if(!["1","2","3"].includes(val)){mlog("opção inválida.","err");return;}
+    const arquivos={"1":"ST5_EP01_FINAL_v3.mkv (6.8GB)","2":"ST5_EP02_ROUGH_v1.mkv (5.1GB)","3":"OBX_S4_EP08_FINAL.mkv (4.2GB)"};
+    mlog("selecionado: "+arquivos[val],"");
+    document.getElementById("minput-row").style.display="none";
+    mlog("","");
+    setTimeout(()=>mlog("iniciando extração...","dim"),300);
+    setTimeout(()=>mlog("████░░░░░░ 40%","dim"),800);
+    setTimeout(()=>mlog("████████░░ 80%","dim"),1500);
+    setTimeout(()=>mlog("██████████ 100% — extração concluída","ok"),2200);
+    setTimeout(()=>{
+      mlog("","");
+      mlog("PASSO 3/3 — o que você faz com o arquivo?","warn");
+      mlog("","");
+      mlog("  [1] Vender para site de pirataria — R$1.200","dim");
+      mlog("  [2] Vazar de graça — rep +25 · +500 seguidores","dim");
+      mlog("  [3] Devolver anonimamente — risco -20%","dim");
+      mlog("","");
+      document.getElementById("mprompt").textContent="decisão (1-3): ";
+      document.getElementById("minput-row").style.display="flex";
+      document.getElementById("minput").focus();
+      _step=2;
+    },2800);
+
+  } else if(_step===2){
+    if(!["1","2","3"].includes(val)){mlog("opção inválida.","err");return;}
+    document.getElementById("minput-row").style.display="none";
+    setTimeout(()=>{
+      mlog("","");
+      if(val==="1"){
+        mlog("transferindo para comprador...","dim");
+        setTimeout(()=>{
+          mlog(">>> ARQUIVO VENDIDO — R$1.200 recebido","ok");
+          mlog("+R$1.200 · +100xp · rep +15 · risco +30%","ok");
+          const m=MISSIONS.find(x=>x.id==="netflix_leak");
+          S.money+=1200;gainXP(m.xp);S.rep+=15;S.heat=Math.min(100,S.heat+30);
+          S._totalEarned=(S._totalEarned||0)+1200;
+          S.doneMissions.add("netflix_leak");
+          log("> Netflix: episódio vendido para pirata — R$1.200","ok");
+          toast("💰 Arquivo vendido! +R$1.200");
+          updateUI();renderMissions();
+          setTimeout(()=>completeMission(2500),500);
+        },1000);
+      } else if(val==="2"){
+        mlog("vazando para torrents e fóruns...","dim");
+        setTimeout(()=>{
+          mlog(">>> VAZADO GRATUITAMENTE — você virou lenda","ok");
+          mlog("+R$0 · +100xp · rep +25 · +500 seguidores","ok");
+          const m=MISSIONS.find(x=>x.id==="netflix_leak");
+          gainXP(m.xp);S.rep+=25;S.heat=Math.min(100,S.heat+25);
+          gainFollowers(500);
+          S.doneMissions.add("netflix_leak");
+          addFeedItem("stranger things 5 está na internet. não fui eu. 👀");
+          log("> Netflix: episódio vazado gratuitamente — +500 seguidores","ok");
+          toast("🌊 Vazado! +500 seguidores");
+          updateUI();renderMissions();
+          setTimeout(()=>completeMission(2500),500);
+        },1000);
+      } else {
+        mlog("enviando arquivo de volta anonimamente...","dim");
+        setTimeout(()=>{
+          mlog(">>> DEVOLVIDO ANONIMAMENTE","ok");
+          mlog("+R$0 · +100xp · rep +10 · risco -20%","ok");
+          const m=MISSIONS.find(x=>x.id==="netflix_leak");
+          gainXP(m.xp);S.rep+=10;S.heat=Math.max(0,S.heat-20);
+          S.doneMissions.add("netflix_leak");
+          log("> Netflix: episódio devolvido anonimamente — risco -20%","ok");
+          toast("✊ Devolvido! Risco -20%");
+          updateUI();renderMissions();
+          setTimeout(()=>completeMission(2500),500);
+        },1000);
+      }
+    },300);
+  }
+}
+
+// ---- NOTA FACULDADE ----
+const SENHAS_PROF=["usp2024","roberto123","calc3","professor","alves123","123456","roberto","usp123","cálculo"];
+
+function submitNotaFacul(){
+  const val=document.getElementById("minput").value.trim();
+  document.getElementById("minput").value="";
+
+  if(_step===0){
+    // senha do professor
+    const pass=val.toLowerCase();
+    document.getElementById("minput").type="text";
+    mlog("tentando acesso...","dim");
+    document.getElementById("minput-row").style.display="none";
+    setTimeout(()=>{
+      if(SENHAS_PROF.includes(pass)||pass.includes("usp")||pass.includes("prof")||pass.includes("roberto")){
+        mlog("","");mlog("acesso concedido — Júpiter Web / USP","ok");
+        mlog("","");
+        setTimeout(()=>{
+          mlog("PASSO 2/3 — localize o aluno:","warn");
+          mlog("","");
+          mlog("  turma 2024B — Cálculo III","dim");
+          mlog("  [1] buscar por nome","dim");
+          mlog("  [2] buscar por NUSP","dim");
+          mlog("  [3] ver lista completa da turma","dim");
+          mlog("","");
+          document.getElementById("mprompt").textContent="opção (1-3): ";
+          document.getElementById("minput-row").style.display="flex";
+          document.getElementById("minput").focus();
+          _step=1;
+        },600);
+      } else {
+        mlog("","");mlog("senha incorreta.","err");
+        mlog("dica: professores usam senhas simples — nome+ano ou usp+ano","warn");
+        setTimeout(()=>{
+          document.getElementById("mprompt").textContent="senha: ";
+          document.getElementById("minput").type="password";
+          document.getElementById("minput-row").style.display="flex";
+          document.getElementById("minput").focus();
+        },600);
+      }
+    },800);
+
+  } else if(_step===1){
+    mlog("opção: "+val,"");
+    document.getElementById("minput-row").style.display="none";
+    setTimeout(()=>{
+      mlog("","");
+      mlog("aluno encontrado: M. Brandão — NUSP 1234567","ok");
+      mlog("disciplina: Cálculo III — nota atual: 4,2","warn");
+      mlog("","");
+      mlog("PASSO 3/3 — qual nota você vai inserir?","warn");
+      mlog("atenção: alteração >3 pontos aciona auditoria automática","err");
+      mlog("","");
+      mlog("  [1] 7,0 — aprovado, dentro do limite seguro","dim");
+      mlog("  [2] 9,5 — aprovado com distinção (suspeito)","dim");
+      mlog("  [3] cancelar missão — não quero me envolver","dim");
+      mlog("","");
+      document.getElementById("mprompt").textContent="decisão (1-3): ";
+      document.getElementById("minput-row").style.display="flex";
+      document.getElementById("minput").focus();
+      _step=2;
+    },600);
+
+  } else if(_step===2){
+    document.getElementById("minput-row").style.display="none";
+    if(val==="3"){
+      mlog("","");mlog("missão cancelada.","warn");
+      mlog("você decidiu não se envolver.","dim");
+      mlog("+rep +5 — integridade reconhecida no submundo","ok");
+      S.rep+=5;log("> recusou alterar nota — +5 rep","ok");toast("✊ Integridade: +5 rep");
+      updateUI();
+      setTimeout(()=>document.getElementById("modal-bg").classList.remove("open"),2500);
+      return;
+    }
+    const nota=val==="2"?"9,5":"7,0";
+    const suspeito=val==="2";
+    setTimeout(()=>mlog("alterando nota no banco de dados...","dim"),300);
+    setTimeout(()=>mlog(suspeito?"[AVISO] alteração acima do limite — auditoria acionada":"alteração dentro do limite seguro",suspeito?"err":"ok"),900);
+    setTimeout(()=>mlog("salvando registro...","dim"),1400);
+    setTimeout(()=>{
+      mlog("","");
+      mlog(">>> NOTA ALTERADA: 4,2 → "+nota,"ok");
+      mlog("+R$800 · +90xp · rep +10 · risco +25%"+(suspeito?" · [ALERTA] Salles investigando":""),"ok");
+      const m=MISSIONS.find(x=>x.id==="nota_facul");
+      S.money+=m.m;gainXP(m.xp);S.rep+=m.rep;
+      S.heat=Math.min(100,S.heat+m.heat+(suspeito?15:0));
+      S._totalEarned=(S._totalEarned||0)+m.m;
+      S.doneMissions.add("nota_facul");
+      if(suspeito){S.agent.level=Math.min(4,S.agent.level+1);log("> nota suspeita — Salles escalou","err");}
+      log("> nota alterada: 4,2 → "+nota+" — R$800 recebido","ok");
+      toast("🎓 Nota alterada! +R$800");
+      updateUI();renderMissions();
+      setTimeout(()=>completeMission(2500),500);
+    },2000);
+  }
 }
 
 // ---- WEBMAIL / INTERCEPTAR BÔNUS ----
@@ -3654,7 +3927,7 @@ runIntro();
 </script>
 
 <div style="text-align:center;padding:16px 0 8px;font-size:10px;color:#30363d;font-family:monospace">
-  <a href="/changelog.html" style="color:#30363d;text-decoration:none" onmouseover="this.style.color='#58a6ff'" onmouseout="this.style.color='#30363d'">v0.1.28 — ver changelog</a>
+  <a href="/changelog.html" style="color:#30363d;text-decoration:none" onmouseover="this.style.color='#58a6ff'" onmouseout="this.style.color='#30363d'">v0.1.30 — ver changelog</a>
 </div>
 
 </body>
