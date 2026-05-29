@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KTCW2P13V8"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-KTCW2P13V8');
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Simulador de Hacker (RPG) — HackerLife</title>
@@ -54,6 +45,16 @@ body{font-family:monospace;background:#0d1117;color:#c9d1d9;min-height:100vh}
 .landing-feat strong{color:#c9d1d9;display:block;margin-bottom:2px}
 .landing-divider{border:none;border-top:1px solid #21262d;margin:36px 0}
 .landing-footer{text-align:center;font-size:10px;color:#30363d;padding-top:16px}
+.faq-section{margin-top:24px}
+.faq-title{font-size:15px;font-weight:700;color:#e6edf3;margin-bottom:16px;text-align:center}
+.faq-category{font-size:10px;font-weight:700;color:#3fb950;text-transform:uppercase;letter-spacing:0.1em;margin:16px 0 8px;padding-left:4px}
+.faq-item{border:1px solid #21262d;border-radius:8px;margin-bottom:8px;overflow:hidden}
+.faq-q{padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:#e6edf3;background:#161b22;user-select:none}
+.faq-q:hover{background:#1c2128}
+.faq-q .faq-arrow{font-size:10px;color:#484f58;transition:transform 0.2s;flex-shrink:0;margin-left:8px}
+.faq-item.open .faq-arrow{transform:rotate(180deg)}
+.faq-a{font-size:11px;color:#c9d1d9;line-height:1.6;padding:0 14px;max-height:0;overflow:hidden;transition:max-height 0.3s ease,padding 0.3s}
+.faq-item.open .faq-a{max-height:300px;padding:10px 14px 14px}
 @media(max-width:520px){.landing-feats{grid-template-columns:1fr}}
 </style>
 </head>
@@ -119,6 +120,121 @@ body{font-family:monospace;background:#0d1117;color:#c9d1d9;min-height:100vh}
 
     <hr class="landing-divider">
 
+    <div class="faq-section">
+      <h2 class="faq-title">Perguntas Frequentes</h2>
+
+      <div class="faq-category">⚙️ Mecânicas e progressão</div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">O que é o Simulador de Hacker? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">O Simulador de Hacker é um jogo RPG gratuito jogado direto no navegador. Você assume o papel de ghost_zero, um hacker que foi demitido injustamente e precisa provar sua inocência infiltrando sistemas corporativos, construindo reputação no submundo digital e completando missões interativas baseadas em técnicas reais de segurança.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">O jogo é gratuito? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Sim, o HackerLife é 100% gratuito. Não há compras dentro do jogo, assinaturas ou anúncios. Acesse, jogue e evolua sem gastar nada.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Precisa instalar alguma coisa? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Não. O HackerLife roda direto no navegador, em qualquer dispositivo — celular, tablet ou computador. Nenhum download, nenhum cadastro.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">É possível jogar pelo celular? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Sim! O jogo foi desenvolvido com mobile em mente. Toda a interface é responsiva e funciona bem em telas pequenas.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Com que frequência o jogo é atualizado? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">O HackerLife está em desenvolvimento ativo com atualizações regulares. Novas missões, mecânicas e conteúdo narrativo são adicionados frequentemente. Confira o <a href="/changelog.html" style="color:#58a6ff">changelog</a> para ver o histórico completo.</div>
+      </div>
+
+      <div class="faq-category">❓ Perguntas gerais</div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Como jogar o Simulador de Hacker? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Para jogar: 1) Clique em "Jogar Agora" na página inicial. 2) Assista à intro que apresenta a história do personagem. 3) Comece fazendo deliveries e pequenos hacks para ganhar experiência e dinheiro. 4) Evolua comprando upgrades, completando missões interativas e entrando em grupos hackers. O painel de "próximos objetivos" guia você em cada etapa.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Quais são os tipos de missões disponíveis? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">O jogo tem missões interativas com terminal real: invasão de servidor Linux, SQL Injection, interceptação de bônus via webmail, phishing de crypto airdrop, defacement de site governamental, armadilha GPS com a polícia, Operação Blackout no Banco Central, alterar nota na faculdade e infiltrar servidores da Netflix — uma missão nova a cada nível.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">O que é SQL Injection no jogo? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">No HackerLife, a missão de SQL Injection simula um ataque real em que você insere código malicioso num formulário de login para extrair o banco de dados de um e-commerce. O jogo explica o conceito e apresenta opções de payload para você escolher, ensinando como essa vulnerabilidade funciona na prática.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">O progresso é salvo automaticamente? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Sim. O jogo salva automaticamente a cada 30 segundos e após cada ação importante — hacks, compras e missões. O progresso fica salvo no navegador e é carregado automaticamente quando você voltar. Para recomeçar do zero, use o botão "reset" discreto ao lado do nível.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Quanto tempo leva para completar o jogo? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Uma sessão casual de 15 a 30 minutos já permite avançar bastante. Completar toda a história principal — do nível 1 ao 0xVoid com a Operação Verdade — leva entre 3 e 5 horas de jogo acumuladas, dependendo do estilo de cada jogador.</div>
+      </div>
+
+      <div class="faq-category">🔒 Segurança e gameplay</div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">O jogo ensina hacking de verdade? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">O HackerLife usa conceitos reais de segurança — SQL Injection, phishing, engenharia social, CVEs conhecidos — de forma educativa e simplificada. O objetivo é criar consciência sobre como ataques funcionam, não ensinar técnicas prejudiciais. É um jogo de entretenimento com elementos educativos.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Qual a diferença entre risco e exposição no jogo? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Risco representa sua atividade recente — sobe a cada hack e cai fazendo deliveries. Exposição indica a chance do Agente Salles te localizar, calculada com base na sua defesa. Risco alto chama atenção, exposição alta facilita o rastreio. Controlar os dois é essencial para não ser capturado.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">O que acontece se o risco chegar a 100%? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Quando o risco atinge 100%, o Agente Salles executa uma operação policial real. Uma cena dramática no terminal se desenrola e você tem 60 segundos para decidir: fugir (perde 30% da grana e upgrades de ataque, mas mantém liberdade) ou ser capturado (perde 50% e entra em modo foragido por 5 minutos).</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Existe multiplayer ou ranking? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Atualmente o HackerLife é single-player com save local no navegador. Sistema de ranking e perfil online estão planejados para versões futuras, permitindo comparar progressos entre jogadores.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">O jogo tem conteúdo adulto? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">O HackerLife tem temática de crime digital e tensão narrativa, mas sem conteúdo violento explícito ou sexual. É adequado para maiores de 12 anos interessados em tecnologia, segurança digital e jogos de estratégia com narrativa.</div>
+      </div>
+
+      <div class="faq-category">⚙️ Mecânicas e progressão</div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Quais são os grupos hackers do jogo? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Há três grupos para entrar conforme você evolui: NullByte Crew (nível 3, iniciantes), Phantom Syndicate (nível 6, intermediário — requer Servidor VPS) e 0xVoid (nível 10, elite — o grupo mais perigoso do submundo e porta de entrada para o desfecho da história).</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">O que é a Operação Blackout? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">A Operação Blackout é uma missão de alto risco no nível 7 em que você tenta hackear o sistema de homologação do Banco Central usando a vulnerabilidade Log4Shell. Com uma janela de apenas 4 minutos, você precisa agir rápido e decidir como escapar quando a polícia chegar.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Quais são os requisitos técnicos para jogar? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Qualquer navegador moderno funciona — Chrome, Firefox, Safari ou Edge. Não há requisitos especiais de hardware. O jogo roda em celulares antigos, tablets e computadores sem dificuldade.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Qual é a história do jogo? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Você é Lucas Mendes, um sysadmin demitido injustamente da TechNova S.A. após um rival plantar provas falsas contra você. Sem emprego, você começa fazendo deliveries e aprendendo a hackear com o mentor Kr4ck3r_BR. O objetivo final: infiltrar a TechNova, encontrar as provas reais e expor a conspiração.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Como ganhar dinheiro mais rápido no início? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">No início, alterne entre hacks (Wi-Fi do vizinho e phishing) e deliveries de pizza para controlar o risco. Compre o Firewall assim que juntar R$50 para se proteger. A missão de SQL Injection no nível 2 paga R$500 no total — R$150 de adiantamento e R$350 ao completar — e acelera bastante a progressão.</div>
+      </div>
+
+    </div>
+
+    <hr class="landing-divider">
+
     <div style="text-align:center;padding:8px 0 16px">
       <a class="landing-cta" href="jogar.html">▶ Jogar Agora — é grátis</a>
     </div>
@@ -127,5 +243,30 @@ body{font-family:monospace;background:#0d1117;color:#c9d1d9;min-height:100vh}
 
   </div>
 </div>
-</body>
-</html>
+
+<script>
+// FAQ accordion
+document.querySelectorAll('.faq-q').forEach(q=>{
+  q.addEventListener('click',()=>q.parentElement.classList.toggle('open'));
+});
+</script>
+
+<!-- FAQ Schema para Google Rich Snippets -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"O que é o Simulador de Hacker?","acceptedAnswer":{"@type":"Answer","text":"O Simulador de Hacker é um jogo RPG gratuito jogado direto no navegador. Você assume o papel de ghost_zero, um hacker que foi demitido injustamente e precisa provar sua inocência infiltrando sistemas corporativos, construindo reputação no submundo digital e completando missões interativas."}},
+    {"@type":"Question","name":"O jogo é gratuito?","acceptedAnswer":{"@type":"Answer","text":"Sim, o HackerLife é 100% gratuito. Não há compras dentro do jogo, assinaturas ou anúncios."}},
+    {"@type":"Question","name":"Precisa instalar alguma coisa?","acceptedAnswer":{"@type":"Answer","text":"Não. O HackerLife roda direto no navegador, em qualquer dispositivo. Nenhum download, nenhum cadastro necessário."}},
+    {"@type":"Question","name":"Como jogar o Simulador de Hacker?","acceptedAnswer":{"@type":"Answer","text":"Clique em Jogar Agora, assista à intro, comece fazendo deliveries e hacks básicos para ganhar experiência. O painel de próximos objetivos guia cada etapa da progressão."}},
+    {"@type":"Question","name":"O progresso é salvo automaticamente?","acceptedAnswer":{"@type":"Answer","text":"Sim. O jogo salva automaticamente a cada 30 segundos e após cada ação importante. O progresso fica salvo no navegador e é carregado automaticamente quando você voltar."}},
+    {"@type":"Question","name":"O que acontece se o risco chegar a 100%?","acceptedAnswer":{"@type":"Answer","text":"O Agente Salles executa uma operação policial. Você tem 60 segundos para decidir: fugir (perde 30% da grana) ou ser capturado (modo foragido por 5 minutos)."}},
+    {"@type":"Question","name":"Quanto tempo leva para completar o jogo?","acceptedAnswer":{"@type":"Answer","text":"Completar toda a história principal leva entre 3 e 5 horas de jogo acumuladas, dependendo do estilo de cada jogador."}},
+    {"@type":"Question","name":"O jogo ensina hacking de verdade?","acceptedAnswer":{"@type":"Answer","text":"O HackerLife usa conceitos reais de segurança de forma educativa e simplificada. O objetivo é criar consciência sobre como ataques funcionam, não ensinar técnicas prejudiciais."}},
+    {"@type":"Question","name":"Qual é a história do jogo?","acceptedAnswer":{"@type":"Answer","text":"Você é Lucas Mendes, sysadmin demitido injustamente da TechNova S.A. O objetivo é infiltrar a empresa, encontrar provas reais e expor a conspiração que destruiu sua carreira."}},
+    {"@type":"Question","name":"É possível jogar pelo celular?","acceptedAnswer":{"@type":"Answer","text":"Sim! O jogo foi desenvolvido com mobile em mente. Toda a interface é responsiva e funciona bem em telas pequenas."}}
+  ]
+}
+</script>
