@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /jogar
+Disallow: /jogar.html
+
+Sitemap: https://simuladordehacker.com.br/sitemap.xml
