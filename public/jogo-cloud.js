@@ -15,6 +15,50 @@
   function readLocal() {
     try { return JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); } catch (e) { return null; }
   }
+  // Lê o apelido da sessão de forma síncrona (sem esperar o Supabase carregar).
+  function nickSync() {
+    try {
+      var o = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      var u = o && (o.user || (o.currentSession && o.currentSession.user));
+      return (u && u.user_metadata && u.user_metadata.username) || null;
+    } catch (e) { return null; }
+  }
+
+  // Troca o handle "ghost_zero" exibido pelo apelido do jogador (só o texto na tela).
+  // Pega conteúdo já renderizado e o que aparece dinamicamente (terminal, e-mails, feed).
+  function personalizeHandle(nick) {
+    var TARGET = "ghost_zero";
+    if (window.__hlPersonalized) return;
+    if (!nick || nick === TARGET || nick.indexOf(TARGET) !== -1) return; // evita loop
+    window.__hlPersonalized = true;
+
+    function fixText(node) {
+      if (node.nodeValue && node.nodeValue.indexOf(TARGET) !== -1) {
+        node.nodeValue = node.nodeValue.split(TARGET).join(nick);
+      }
+    }
+    function walk(node) {
+      if (node.nodeType === 3) { fixText(node); return; }
+      if (node.nodeType !== 1) return;
+      var t = node.tagName;
+      if (t === "SCRIPT" || t === "STYLE" || t === "INPUT" || t === "TEXTAREA") return;
+      if (node.id === "hl-cloud-badge") return;
+      for (var i = 0; i < node.childNodes.length; i++) walk(node.childNodes[i]);
+    }
+
+    walk(document.body); // varredura inicial
+    try {
+      var obs = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          if (m.type === "characterData") fixText(m.target);
+          else if (m.addedNodes) for (var j = 0; j < m.addedNodes.length; j++) walk(m.addedNodes[j]);
+        }
+      });
+      obs.observe(document.body, { subtree: true, childList: true, characterData: true });
+    } catch (e) {}
+  }
+
   function loadScript(src) {
     return new Promise(function (res, rej) {
       var s = document.createElement("script");
@@ -49,6 +93,10 @@
   }
 
   async function main() {
+    // Personaliza o handle "ghost_zero" com o apelido do jogador logado (imediato).
+    var earlyNick = nickSync();
+    if (earlyNick) personalizeHandle(earlyNick);
+
     // Evento de início de jogo (uma vez por aba), antes de depender da nuvem.
     var loggedInGuess = !!localStorage.getItem(STORAGE_KEY);
     if (!sessionStorage.getItem(START_FLAG)) {
@@ -129,7 +177,7 @@
       var nick = (session.user.user_metadata && session.user.user_metadata.username) || "você";
       el.innerHTML =
         '<span style="color:#7ee787">☁</span><span>' + escapeHtml(nick) + "</span>" +
-        '<a href="/ranking" style="color:#484f58;text-decoration:none">ranking</a>' +
+        '<a href="/ranking" target="_blank" rel="noopener" style="color:#484f58;text-decoration:none">ranking ↗</a>' +
         '<a href="#" id="hl-logout" style="color:#484f58;text-decoration:none">sair</a>';
       el.querySelector("#hl-logout").addEventListener("click", async function (ev) {
         ev.preventDefault();
