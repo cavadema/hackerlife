@@ -7,6 +7,68 @@
   var STORAGE_KEY = "sb-hackerlife-auth";
   var SYNC_FLAG = "hl_cloud_synced";
   var START_FLAG = "hl_started";
+  var MSG_KEY = "hl_msgs_v1"; // persistência das mensagens (inbox/sms do celular)
+
+  // ---- Persistência das mensagens do celular (e-mails + SMS) ----
+  // inbox/smsBox não são globais, mas addEmail/addSMS/renderPhone/toast são.
+  // Intercepta as adições: guarda no localStorage, restaura na ordem ao carregar
+  // (sem toast) e ignora reenvios duplicados (o onboarding reenvia a cada load).
+  function msgSig(kind, e) {
+    return kind === "e"
+      ? "e|" + (e.subject || "") + "|" + (e.body || "")
+      : "s|" + (e.from || "") + "|" + (e.text || "");
+  }
+  function loadMsgStore() {
+    try { return JSON.parse(localStorage.getItem(MSG_KEY) || "null") || { log: [] }; }
+    catch (e) { return { log: [] }; }
+  }
+  function setupMessagePersistence() {
+    if (window.__hlMsgPersist) return;
+    if (typeof window.addEmail !== "function" || typeof window.addSMS !== "function") return;
+    window.__hlMsgPersist = true;
+
+    var store = loadMsgStore();
+    var delivered = {};
+    for (var i = 0; i < store.log.length; i++) {
+      var it = store.log[i];
+      delivered[msgSig(it.k, it.m)] = 1;
+    }
+    function persist() { try { localStorage.setItem(MSG_KEY, JSON.stringify(store)); } catch (e) {} }
+
+    var origAddEmail = window.addEmail;
+    var origAddSMS = window.addSMS;
+
+    window.addEmail = function (e) {
+      var sig = msgSig("e", e);
+      if (delivered[sig]) return;        // já entregue antes → ignora (sem replay)
+      delivered[sig] = 1;
+      var r = origAddEmail(e);
+      store.log.push({ k: "e", m: e }); persist();
+      return r;
+    };
+    window.addSMS = function (e) {
+      var sig = msgSig("s", e);
+      if (delivered[sig]) return;
+      delivered[sig] = 1;
+      var r = origAddSMS(e);
+      store.log.push({ k: "s", m: e }); persist();
+      return r;
+    };
+
+    // Restaura as mensagens já entregues, na ordem original, sem notificação/toast.
+    if (store.log.length) {
+      var origToast = window.toast;
+      try {
+        window.toast = function () {};
+        for (var j = 0; j < store.log.length; j++) {
+          var m = store.log[j];
+          if (m.k === "e") origAddEmail(m.m); else origAddSMS(m.m);
+        }
+      } catch (e) {}
+      window.toast = origToast;
+      try { if (typeof window.renderPhone === "function") window.renderPhone(); } catch (e) {}
+    }
+  }
 
   function ga() {
     var g = window.gtag;
@@ -159,6 +221,7 @@
       if (!confirm("Tem certeza? Todo o progresso será perdido.")) return;
       try { await sb.from("game_saves").delete().eq("user_id", uid); } catch (e) {}
       try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+      try { localStorage.removeItem(MSG_KEY); } catch (e) {}
       sessionStorage.setItem(SYNC_FLAG, "1");
       location.reload();
     };
@@ -187,6 +250,7 @@
           await sb.auth.signOut();
         } catch (e) {}
         try { sessionStorage.removeItem(SYNC_FLAG); } catch (e) {}
+        try { localStorage.removeItem(MSG_KEY); } catch (e) {}
         location.href = "/";
       });
     } else {
@@ -202,6 +266,9 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
+
+  // Persistência de mensagens: síncrona e imediata, antes do initGame (onboarding).
+  setupMessagePersistence();
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", main);
   else main();
