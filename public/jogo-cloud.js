@@ -8,6 +8,7 @@
   var SYNC_FLAG = "hl_cloud_synced";
   var START_FLAG = "hl_started";
   var MSG_KEY = "hl_msgs_v1"; // persistência das mensagens (inbox/sms do celular)
+  var cloudPush = null; // definido em main() quando logado: agenda push à nuvem
 
   // ---- Persistência das mensagens do celular (e-mails + SMS) ----
   // inbox/smsBox não são globais, mas addEmail/addSMS/renderPhone/toast são.
@@ -21,6 +22,21 @@
   function loadMsgStore() {
     try { return JSON.parse(localStorage.getItem(MSG_KEY) || "null") || { log: [] }; }
     catch (e) { return { log: [] }; }
+  }
+  // Une dois logs de mensagens por assinatura, preservando a ordem (a primeiro, extras de b depois).
+  function mergeLogs(a, b) {
+    var seen = {}, out = [];
+    function add(log) {
+      if (!log || !log.length) return;
+      for (var i = 0; i < log.length; i++) {
+        var it = log[i];
+        if (!it || !it.m) continue;
+        var sig = msgSig(it.k, it.m);
+        if (!seen[sig]) { seen[sig] = 1; out.push(it); }
+      }
+    }
+    add(a); add(b);
+    return out;
   }
   function setupMessagePersistence() {
     if (window.__hlMsgPersist) return;
@@ -44,6 +60,7 @@
       delivered[sig] = 1;
       var r = origAddEmail(e);
       store.log.push({ k: "e", m: e }); persist();
+      if (cloudPush) cloudPush();
       return r;
     };
     window.addSMS = function (e) {
@@ -52,6 +69,7 @@
       delivered[sig] = 1;
       var r = origAddSMS(e);
       store.log.push({ k: "s", m: e }); persist();
+      if (cloudPush) cloudPush();
       return r;
     };
 
@@ -187,16 +205,26 @@
     var uid = session.user.id;
     var username = (session.user.user_metadata && session.user.user_metadata.username) || null;
 
-    // PULL — reconcilia com a nuvem uma vez por carregamento.
+    // PULL — reconcilia progresso E mensagens com a nuvem uma vez por carregamento.
     if (!sessionStorage.getItem(SYNC_FLAG)) {
       try {
-        var res = await sb.from("game_saves").select("data").eq("user_id", uid).maybeSingle();
+        var res = await sb.from("game_saves").select("data, messages").eq("user_id", uid).maybeSingle();
         var server = res.data && res.data.data;
+        var serverMsgs = (res.data && res.data.messages) || null;
         var local = readLocal();
         var sServer = (server && server.savedAt) || 0;
         var sLocal = (local && local.savedAt) || 0;
-        if (server && (!local || sServer > sLocal)) {
-          localStorage.setItem(SAVE_KEY, JSON.stringify(server));
+
+        var progressNewer = server && (!local || sServer > sLocal);
+
+        // Mescla as mensagens: se a nuvem trouxe alguma que falta no local, atualiza.
+        var localStore = loadMsgStore();
+        var mergedLog = mergeLogs(serverMsgs && serverMsgs.log, localStore.log);
+        var msgsChanged = mergedLog.length !== localStore.log.length;
+
+        if (progressNewer || msgsChanged) {
+          if (progressNewer) localStorage.setItem(SAVE_KEY, JSON.stringify(server));
+          if (msgsChanged) localStorage.setItem(MSG_KEY, JSON.stringify({ log: mergedLog }));
           sessionStorage.setItem(SYNC_FLAG, "1");
           location.reload();
           return;
@@ -205,16 +233,17 @@
       sessionStorage.setItem(SYNC_FLAG, "1");
     }
 
-    // PUSH — espelha saves locais na nuvem (debounce).
+    // PUSH — espelha save + mensagens na nuvem (debounce).
     var timer = null;
     function cloudSave() {
       var data = readLocal();
       if (!data) return;
       sb.from("game_saves")
-        .upsert({ user_id: uid, username: username, data: data, level: data.level || 1, updated_at: new Date().toISOString() })
+        .upsert({ user_id: uid, username: username, data: data, messages: loadMsgStore(), level: data.level || 1, updated_at: new Date().toISOString() })
         .then(function () {});
     }
-    wrapSaveGame(function () { clearTimeout(timer); timer = setTimeout(cloudSave, 2500); });
+    cloudPush = function () { clearTimeout(timer); timer = setTimeout(cloudSave, 2500); };
+    wrapSaveGame(cloudPush);
 
     // RESET — apaga também o save da nuvem (um confirm só).
     window.resetGame = async function () {
