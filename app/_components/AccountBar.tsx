@@ -13,25 +13,20 @@ export default function AccountBar() {
 
   useEffect(() => {
     let active = true;
-    supabase.auth.getSession().then(({ data }) => {
+    function apply(s: import("@supabase/supabase-js").Session | null) {
       if (!active) return;
-      const s = data.session;
+      try {
+        document.body.dataset.auth = s ? "in" : "out";
+      } catch {}
       if (s) {
         const nick = (s.user.user_metadata?.username as string) || "você";
         setState({ status: "auth", nick });
       } else {
         setState({ status: "anon" });
       }
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      if (!active) return;
-      if (s) {
-        const nick = (s.user.user_metadata?.username as string) || "você";
-        setState({ status: "auth", nick });
-      } else {
-        setState({ status: "anon" });
-      }
-    });
+    }
+    supabase.auth.getSession().then(({ data }) => apply(data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => apply(s));
     return () => {
       active = false;
       sub.subscription.unsubscribe();
@@ -52,6 +47,9 @@ export default function AccountBar() {
 
       {state.status === "anon" && (
         <>
+          <a className="acctbar-link" href="/ranking">
+            Ranking
+          </a>
           <a className="acctbar-link" href="/entrar">
             Entrar
           </a>
@@ -66,6 +64,9 @@ export default function AccountBar() {
           <span className="acctbar-nick">
             <span className="acctbar-cloud">☁</span> {state.nick}
           </span>
+          <a className="acctbar-link" href="/ranking">
+            Ranking
+          </a>
           <a className="acctbar-cta" href="/jogar">
             Continuar jogo
           </a>

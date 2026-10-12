@@ -1,31 +1,65 @@
-/* HackerLife — sincronização do save com a nuvem (Supabase).
-   Não altera o motor do jogo: encaixa na costura saveGame/loadGame/resetGame.
-   Anônimo = comportamento atual (só localStorage). Logado = save sobe/baixa da nuvem. */
+/* HackerLife — nuvem (Supabase) + eventos de funil (GA4).
+   Não altera o motor do jogo: encaixa em saveGame/loadGame/resetGame.
+   Eventos de GA rodam para TODOS (anônimos incluídos). Nuvem só para logados. */
 (function () {
   "use strict";
   var SAVE_KEY = "hackerlife_save";
   var STORAGE_KEY = "sb-hackerlife-auth";
   var SYNC_FLAG = "hl_cloud_synced";
+  var START_FLAG = "hl_started";
 
+  function ga() {
+    var g = window.gtag;
+    if (typeof g === "function") { try { g.apply(null, arguments); } catch (e) {} }
+  }
+  function readLocal() {
+    try { return JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); } catch (e) { return null; }
+  }
   function loadScript(src) {
     return new Promise(function (res, rej) {
       var s = document.createElement("script");
-      s.src = src;
-      s.onload = res;
-      s.onerror = rej;
+      s.src = src; s.onload = res; s.onerror = rej;
       document.head.appendChild(s);
     });
   }
 
-  function readLocal() {
-    try { return JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); } catch (e) { return null; }
+  // Emite eventos de funil comparando o save anterior com o novo.
+  function emitFunnel(prev, cur) {
+    if (!cur) return;
+    if (prev && cur.level > prev.level) ga("event", "nivel_up", { level: cur.level });
+    var curM = (cur.doneMissions && cur.doneMissions.length) || 0;
+    var prevM = (prev && prev.doneMissions && prev.doneMissions.length) || 0;
+    if (curM > prevM) ga("event", "missao_completada", { total: curM, level: cur.level || 1 });
+  }
+
+  // Embrulha saveGame para: (1) eventos de GA (todos) e (2) push à nuvem (logados).
+  function wrapSaveGame(onSave) {
+    if (typeof window.saveGame !== "function" || window.__hlWrapped) return;
+    window.__hlWrapped = true;
+    var prev = readLocal();
+    var orig = window.saveGame;
+    window.saveGame = function () {
+      var r = orig.apply(this, arguments);
+      var cur = readLocal();
+      emitFunnel(prev, cur);
+      prev = cur;
+      if (onSave) onSave(cur);
+      return r;
+    };
   }
 
   async function main() {
+    // Evento de início de jogo (uma vez por aba), antes de depender da nuvem.
+    var loggedInGuess = !!localStorage.getItem(STORAGE_KEY);
+    if (!sessionStorage.getItem(START_FLAG)) {
+      sessionStorage.setItem(START_FLAG, "1");
+      ga("event", "jogo_iniciado", { logado: loggedInGuess });
+    }
+
     var cfg;
     try { cfg = await fetch("/api/config").then(function (r) { return r.json(); }); }
-    catch (e) { return; }
-    if (!cfg || !cfg.url || !cfg.anonKey || !window.supabase) return;
+    catch (e) { wrapSaveGame(null); return; }
+    if (!cfg || !cfg.url || !cfg.anonKey || !window.supabase) { wrapSaveGame(null); return; }
 
     var sb = window.supabase.createClient(cfg.url, cfg.anonKey, {
       auth: { storageKey: STORAGE_KEY, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
@@ -33,7 +67,12 @@
 
     var session = (await sb.auth.getSession()).data.session;
     renderBadge(session);
-    if (!session) return; // anônimo: só local (conversão vem na Fase 3)
+
+    if (!session) {
+      // Anônimo: só GA (sem nuvem). O progresso local é herdado se criar conta depois.
+      wrapSaveGame(null);
+      return;
+    }
 
     var uid = session.user.id;
     var username = (session.user.user_metadata && session.user.user_metadata.username) || null;
@@ -56,7 +95,7 @@
       sessionStorage.setItem(SYNC_FLAG, "1");
     }
 
-    // PUSH — espelha saves locais na nuvem (com debounce), embrulhando saveGame.
+    // PUSH — espelha saves locais na nuvem (debounce).
     var timer = null;
     function cloudSave() {
       var data = readLocal();
@@ -65,23 +104,18 @@
         .upsert({ user_id: uid, username: username, data: data, level: data.level || 1, updated_at: new Date().toISOString() })
         .then(function () {});
     }
-    function schedule() { clearTimeout(timer); timer = setTimeout(cloudSave, 2500); }
-
-    if (typeof window.saveGame === "function") {
-      var origSave = window.saveGame;
-      window.saveGame = function () { var r = origSave.apply(this, arguments); schedule(); return r; };
-    }
+    wrapSaveGame(function () { clearTimeout(timer); timer = setTimeout(cloudSave, 2500); });
 
     // RESET — apaga também o save da nuvem (um confirm só).
     window.resetGame = async function () {
       if (!confirm("Tem certeza? Todo o progresso será perdido.")) return;
       try { await sb.from("game_saves").delete().eq("user_id", uid); } catch (e) {}
       try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
-      sessionStorage.setItem(SYNC_FLAG, "1"); // evita re-puxar após o reload
+      sessionStorage.setItem(SYNC_FLAG, "1");
       location.reload();
     };
 
-    cloudSave(); // garante que a nuvem reflita o estado atual ao entrar
+    cloudSave(); // garante que a nuvem reflita o estado atual (inclui progresso anônimo herdado)
   }
 
   function renderBadge(session) {
@@ -95,6 +129,7 @@
       var nick = (session.user.user_metadata && session.user.user_metadata.username) || "você";
       el.innerHTML =
         '<span style="color:#7ee787">☁</span><span>' + escapeHtml(nick) + "</span>" +
+        '<a href="/ranking" style="color:#484f58;text-decoration:none">ranking</a>' +
         '<a href="#" id="hl-logout" style="color:#484f58;text-decoration:none">sair</a>';
       el.querySelector("#hl-logout").addEventListener("click", async function (ev) {
         ev.preventDefault();
@@ -109,7 +144,7 @@
     } else {
       el.innerHTML =
         '<span style="color:#484f58">não salvo</span>' +
-        '<a href="/entrar" style="color:#58a6ff;text-decoration:none">entrar p/ salvar</a>';
+        '<a href="/cadastro" style="color:#58a6ff;text-decoration:none">criar conta p/ salvar</a>';
     }
     document.body.appendChild(el);
   }
