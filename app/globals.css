@@ -40,6 +40,19 @@ details.faq-item[open] summary.faq-q .faq-arrow{transform:rotate(180deg)}
 .landing-mail:hover{color:#58a6ff}
 @media(max-width:520px){.landing-feats{grid-template-columns:1fr}}
 
+/* ---- Barra de conta na home ---- */
+.acctbar{display:flex;justify-content:flex-end;align-items:center;gap:12px;min-height:34px;margin-bottom:8px}
+.acctbar-ph{display:block;height:34px}
+.acctbar-link{background:none;border:none;color:#8b949e;font-family:monospace;font-size:12px;cursor:pointer;text-decoration:none;padding:7px 4px}
+.acctbar-link:hover{color:#c9d1d9}
+.acctbar-cta{background:#161b22;border:1px solid #30363d;border-radius:7px;color:#7ee787;font-family:monospace;font-size:12px;font-weight:700;padding:7px 14px;text-decoration:none;transition:border-color .15s,background .15s}
+.acctbar-cta:hover{border-color:#2ea043;background:#1c2128}
+.acctbar-nick{color:#c9d1d9;font-size:12px;font-family:monospace}
+.acctbar-cloud{color:#7ee787}
+.hero-nudge{font-size:12px;color:#8b949e;margin-top:14px}
+.hero-nudge a{color:#58a6ff;text-decoration:none}
+.hero-nudge a:hover{text-decoration:underline}
+
 /* ---- Auth (login / cadastro) ---- */
 .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 16px;background:#0d1117}
 .auth-card{width:100%;max-width:380px}

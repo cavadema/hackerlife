@@ -1,3 +1,5 @@
+import AccountBar from "./_components/AccountBar";
+
 const softwareSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -21,7 +23,7 @@ const faqSchema = {
     { "@type": "Question", name: "O jogo é gratuito?", acceptedAnswer: { "@type": "Answer", text: "Sim, o HackerLife é 100% gratuito. Não há compras dentro do jogo, assinaturas ou anúncios." } },
     { "@type": "Question", name: "Precisa instalar alguma coisa?", acceptedAnswer: { "@type": "Answer", text: "Não. O HackerLife roda direto no navegador, em qualquer dispositivo. Nenhum download, nenhum cadastro necessário." } },
     { "@type": "Question", name: "Como jogar o Simulador de Hacker?", acceptedAnswer: { "@type": "Answer", text: "Clique em Jogar Agora, assista à intro, comece fazendo deliveries e hacks básicos para ganhar experiência. O painel de próximos objetivos guia cada etapa da progressão." } },
-    { "@type": "Question", name: "O progresso é salvo automaticamente?", acceptedAnswer: { "@type": "Answer", text: "Sim. O jogo salva automaticamente a cada 30 segundos e após cada ação importante. O progresso fica salvo no navegador e é carregado automaticamente quando você voltar." } },
+    { "@type": "Question", name: "O progresso é salvo automaticamente?", acceptedAnswer: { "@type": "Answer", text: "Sim. O jogo salva automaticamente a cada 30 segundos e após cada ação importante. Sem conta, o progresso fica salvo no navegador; com uma conta grátis, é salvo na nuvem e sincroniza entre dispositivos." } },
     { "@type": "Question", name: "O que acontece se o risco chegar a 100%?", acceptedAnswer: { "@type": "Answer", text: "O Agente Salles executa uma operação policial. Você tem 60 segundos para decidir: fugir (perde 30% da grana) ou ser capturado (modo foragido por 5 minutos)." } },
     { "@type": "Question", name: "Quanto tempo leva para completar o jogo?", acceptedAnswer: { "@type": "Answer", text: "Completar toda a história principal leva entre 3 e 5 horas de jogo acumuladas, dependendo do estilo de cada jogador." } },
     { "@type": "Question", name: "O jogo ensina hacking de verdade?", acceptedAnswer: { "@type": "Answer", text: "O HackerLife usa conceitos reais de segurança de forma educativa e simplificada. O objetivo é criar consciência sobre como ataques funcionam, não ensinar técnicas prejudiciais." } },
@@ -35,6 +37,7 @@ export default function Home() {
     <>
       <div id="landing">
         <div className="landing-inner">
+          <AccountBar />
           <section className="landing-hero">
             <h1>
               Simulador de <span>Hacker</span>
@@ -44,6 +47,9 @@ export default function Home() {
             </p>
             <p className="keywords">hacker rpg · hack simulator online · simulador hacking · jogo de hacker</p>
             <a className="landing-cta" href="/jogar">▶ Jogar Agora — é grátis</a>
+            <p className="hero-nudge">
+              💾 <a href="/cadastro">Crie uma conta grátis</a> e salve seu progresso na nuvem — jogue de qualquer dispositivo.
+            </p>
           </section>
 
           <div className="landing-block">
@@ -140,7 +146,7 @@ export default function Home() {
 
             <details className="faq-item">
               <summary className="faq-q">O progresso é salvo automaticamente? <span className="faq-arrow">▼</span></summary>
-              <div className="faq-a">Sim. O jogo salva automaticamente a cada 30 segundos e após cada ação importante — hacks, compras e missões. O progresso fica salvo no navegador e é carregado automaticamente quando você voltar. Para recomeçar do zero, use o botão &quot;reset&quot; discreto ao lado do nível.</div>
+              <div className="faq-a">Sim. O jogo salva automaticamente a cada 30 segundos e após cada ação importante — hacks, compras e missões. Sem conta, o progresso fica salvo no seu navegador. Com uma conta grátis, ele é salvo na nuvem e sincroniza entre dispositivos — você continua de onde parou em qualquer lugar. Para recomeçar do zero, use o botão &quot;reset&quot; discreto ao lado do nível.</div>
             </details>
 
             <details className="faq-item">
@@ -167,7 +173,7 @@ export default function Home() {
 
             <details className="faq-item">
               <summary className="faq-q">Existe multiplayer ou ranking? <span className="faq-arrow">▼</span></summary>
-              <div className="faq-a">Atualmente o HackerLife é single-player com save local no navegador. Sistema de ranking e perfil online estão planejados para versões futuras, permitindo comparar progressos entre jogadores.</div>
+              <div className="faq-a">Agora o HackerLife tem contas gratuitas com save na nuvem, sincronizando seu progresso entre dispositivos. O ranking online, para comparar seu progresso com o de outros jogadores, está chegando em breve.</div>
             </details>
 
             <details className="faq-item">
