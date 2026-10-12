@@ -39,3 +39,25 @@ details.faq-item[open] summary.faq-q .faq-arrow{transform:rotate(180deg)}
 .landing-mail{color:#484f58;text-decoration:none}
 .landing-mail:hover{color:#58a6ff}
 @media(max-width:520px){.landing-feats{grid-template-columns:1fr}}
+
+/* ---- Auth (login / cadastro) ---- */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 16px;background:#0d1117}
+.auth-card{width:100%;max-width:380px}
+.auth-logo{text-align:center;font-size:22px;font-weight:700;color:#7ee787;letter-spacing:.05em;margin-bottom:6px}
+.auth-logo span{color:#a371f7}
+.auth-sub{text-align:center;font-size:12px;color:#484f58;margin-bottom:28px}
+.auth-form{display:flex;flex-direction:column;gap:12px}
+.auth-field{display:flex;flex-direction:column;gap:5px}
+.auth-field label{font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.08em}
+.auth-field input{background:#161b22;border:1px solid #30363d;border-radius:8px;color:#c9d1d9;font-family:monospace;font-size:14px;padding:11px 12px;outline:none;transition:border-color .15s}
+.auth-field input:focus{border-color:#58a6ff}
+.auth-field .hint{font-size:10px;color:#484f58}
+.auth-btn{background:#238636;border:none;border-radius:8px;color:#fff;font-family:monospace;font-size:15px;font-weight:700;padding:13px;cursor:pointer;transition:background .2s;margin-top:4px}
+.auth-btn:hover:not(:disabled){background:#2ea043}
+.auth-btn:disabled{opacity:.6;cursor:not-allowed}
+.auth-error{background:#3d1418;border:1px solid #6e2731;border-radius:8px;color:#ff7b72;font-size:12px;padding:10px 12px}
+.auth-alt{text-align:center;font-size:12px;color:#8b949e;margin-top:18px}
+.auth-alt a{color:#58a6ff;text-decoration:none}
+.auth-alt a:hover{text-decoration:underline}
+.auth-back{display:block;text-align:center;font-size:11px;color:#484f58;text-decoration:none;margin-top:22px}
+.auth-back:hover{color:#8b949e}
